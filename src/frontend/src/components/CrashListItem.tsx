@@ -1,7 +1,7 @@
-import { type CrashRecord } from '../backend';
+import { type CrashRecord, VerificationStatus } from '../backend';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Plane, Users, AlertTriangle } from 'lucide-react';
+import { Calendar, MapPin, Plane, Users, AlertTriangle, CheckCircle2, XCircle, Sparkles } from 'lucide-react';
 
 interface CrashListItemProps {
   crash: CrashRecord;
@@ -14,6 +14,34 @@ export default function CrashListItem({ crash, onClick }: CrashListItemProps) {
     ? (Number(crash.casualties.fatalities) / Number(crash.casualties.totalAboard) * 100).toFixed(1)
     : '0';
 
+  const getVerificationBadge = () => {
+    switch (crash.verificationStatus) {
+      case VerificationStatus.verified:
+        return (
+          <Badge className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-1">
+            <CheckCircle2 className="h-3 w-3" />
+            Verified
+          </Badge>
+        );
+      case VerificationStatus.unverified:
+        return (
+          <Badge variant="destructive" className="flex items-center gap-1">
+            <XCircle className="h-3 w-3" />
+            Not a Real Crash
+          </Badge>
+        );
+      case VerificationStatus.fantasy:
+        return (
+          <Badge className="bg-purple-500 hover:bg-purple-600 text-white flex items-center gap-1">
+            <Sparkles className="h-3 w-3" />
+            Fantasy/Fictional
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Card 
       className="cursor-pointer hover:bg-accent/50 transition-colors"
@@ -22,13 +50,22 @@ export default function CrashListItem({ crash, onClick }: CrashListItemProps) {
       <CardContent className="p-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex-1 space-y-2">
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start justify-between gap-2 flex-wrap">
               <h3 className="font-semibold text-lg">
                 {crash.airline} Flight {crash.flightNumber}
               </h3>
-              <Badge variant={Number(crash.casualties.survivors) > 0 ? 'default' : 'destructive'}>
-                {Number(crash.casualties.survivors) > 0 ? 'Survivors' : 'No Survivors'}
-              </Badge>
+              <div className="flex gap-2 flex-wrap">
+                {getVerificationBadge()}
+                {crash.isDisasterCrash && (
+                  <Badge variant="destructive" className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600">
+                    <AlertTriangle className="h-3 w-3" />
+                    Disaster Crash ({crash.involvedAircraft.length} Aircraft)
+                  </Badge>
+                )}
+                <Badge variant={Number(crash.casualties.survivors) > 0 ? 'default' : 'destructive'}>
+                  {Number(crash.casualties.survivors) > 0 ? 'Survivors' : 'No Survivors'}
+                </Badge>
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">

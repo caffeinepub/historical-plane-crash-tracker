@@ -89,9 +89,28 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface _CaffeineStorageRefillResult {
-    success?: boolean;
-    topped_up_amount?: bigint;
+export interface CrashRecord {
+    id: bigint;
+    incidentPhotos: Array<ExternalBlob>;
+    status?: string;
+    crashCause: string;
+    source: string;
+    flightNumber: string;
+    submittingOrganization?: string;
+    casualties: CasualtyData;
+    lastUpdated: bigint;
+    phaseOfFlight: string;
+    isDisasterCrash: boolean;
+    flightPath: Array<FlightPathPoint>;
+    investigationTimeline: Array<InvestigationEntry>;
+    involvedAircraft: Array<InvolvedAircraft>;
+    aircraft: Aircraft;
+    externalReferences: Array<string>;
+    airline: string;
+    crashDate: bigint;
+    sourceVerification: boolean;
+    location: Coordinate;
+    verificationStatus: VerificationStatus;
 }
 export interface CasualtyData {
     fatalities: bigint;
@@ -106,6 +125,12 @@ export interface _CaffeineStorageRefillInformation {
 export interface Coordinate {
     latitude: number;
     longitude: number;
+}
+export interface InvolvedAircraft {
+    casualties: CasualtyData;
+    registrationNumber: string;
+    aircraft: Aircraft;
+    airline: string;
 }
 export interface _CaffeineStorageCreateCertificateResult {
     method: string;
@@ -135,24 +160,14 @@ export interface FlightPathPoint {
     coordinate: Coordinate;
     known: boolean;
 }
-export interface CrashRecord {
-    id: bigint;
-    incidentPhotos: Array<ExternalBlob>;
-    status?: string;
-    crashCause: string;
-    source: string;
-    flightNumber: string;
-    submittingOrganization?: string;
-    casualties: CasualtyData;
-    lastUpdated: bigint;
-    phaseOfFlight: string;
-    flightPath: Array<FlightPathPoint>;
-    investigationTimeline: Array<InvestigationEntry>;
-    aircraft: Aircraft;
-    externalReferences: Array<string>;
-    airline: string;
-    crashDate: bigint;
-    location: Coordinate;
+export interface _CaffeineStorageRefillResult {
+    success?: boolean;
+    topped_up_amount?: bigint;
+}
+export enum VerificationStatus {
+    verified = "verified",
+    unverified = "unverified",
+    fantasy = "fantasy"
 }
 export interface backendInterface {
     _caffeineStorageBlobIsLive(hash: Uint8Array): Promise<boolean>;
@@ -161,7 +176,7 @@ export interface backendInterface {
     _caffeineStorageCreateCertificate(blobHash: string): Promise<_CaffeineStorageCreateCertificateResult>;
     _caffeineStorageRefillCashier(refillInformation: _CaffeineStorageRefillInformation | null): Promise<_CaffeineStorageRefillResult>;
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
-    addCrashRecord(crashDate: bigint, location: Coordinate, airline: string, flightNumber: string, aircraft: Aircraft, phaseOfFlight: string, casualties: CasualtyData, crashCause: string, source: string, investigationTimeline: Array<InvestigationEntry>, flightPath: Array<FlightPathPoint>): Promise<bigint>;
+    addCrashRecord(crashDate: bigint, location: Coordinate, airline: string, flightNumber: string, aircraft: Aircraft, phaseOfFlight: string, casualties: CasualtyData, crashCause: string, source: string, investigationTimeline: Array<InvestigationEntry>, flightPath: Array<FlightPathPoint>, isFantasyData: boolean | null, isDisasterCrash: boolean, involvedAircraft: Array<InvolvedAircraft>): Promise<bigint>;
     addInvestigationEntry(crashId: bigint, timestamp: bigint, description: string, author: string, mediaUrls: Array<string>): Promise<bigint>;
     attachPhotoToCrashRecord(crashId: bigint, photo: ExternalBlob): Promise<void>;
     attachPhotoToEntry(crashId: bigint, entryId: bigint, photo: ExternalBlob): Promise<void>;
@@ -169,15 +184,16 @@ export interface backendInterface {
     getAllInvestigationEntries(crashId: bigint): Promise<Array<InvestigationEntry>>;
     getCompleteFlightPath(id: bigint): Promise<Array<FlightPathPoint> | null>;
     getCrashRecord(id: bigint): Promise<CrashRecord>;
+    getCrashRecords(includeFantasy: boolean | null, includeDisasterCrashes: boolean | null): Promise<Array<CrashRecord>>;
     getCrashRecordsByDateRange(startTimestamp: bigint, endTimestamp: bigint): Promise<Array<CrashRecord>>;
     getCrashRecordsByPhase(phase: string): Promise<Array<CrashRecord>>;
     getInvestigationEntry(crashId: bigint, entryId: bigint): Promise<InvestigationEntry | null>;
     getSurvivorStories(): Promise<Array<CrashRecord>>;
     searchCrashRecordsByKeyword(keyword: string): Promise<Array<CrashRecord>>;
-    updateCrashRecord(id: bigint, crashDate: bigint, location: Coordinate, airline: string, flightNumber: string, aircraft: Aircraft, phaseOfFlight: string, casualties: CasualtyData, crashCause: string, source: string, investigationTimeline: Array<InvestigationEntry>, flightPath: Array<FlightPathPoint>): Promise<void>;
+    updateCrashRecord(id: bigint, crashDate: bigint, location: Coordinate, airline: string, flightNumber: string, aircraft: Aircraft, phaseOfFlight: string, casualties: CasualtyData, crashCause: string, source: string, investigationTimeline: Array<InvestigationEntry>, flightPath: Array<FlightPathPoint>, isDisasterCrash: boolean, involvedAircraft: Array<InvolvedAircraft>): Promise<void>;
     updateInvestigationEntry(crashId: bigint, entryId: bigint, timestamp: bigint, newTitle: string, newDescription: string): Promise<void>;
 }
-import type { Aircraft as _Aircraft, CasualtyData as _CasualtyData, Coordinate as _Coordinate, CrashRecord as _CrashRecord, ExternalBlob as _ExternalBlob, FlightPathPoint as _FlightPathPoint, InvestigationEntry as _InvestigationEntry, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
+import type { Aircraft as _Aircraft, CasualtyData as _CasualtyData, Coordinate as _Coordinate, CrashRecord as _CrashRecord, ExternalBlob as _ExternalBlob, FlightPathPoint as _FlightPathPoint, InvestigationEntry as _InvestigationEntry, InvolvedAircraft as _InvolvedAircraft, VerificationStatus as _VerificationStatus, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _caffeineStorageBlobIsLive(arg0: Uint8Array): Promise<boolean> {
@@ -264,17 +280,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async addCrashRecord(arg0: bigint, arg1: Coordinate, arg2: string, arg3: string, arg4: Aircraft, arg5: string, arg6: CasualtyData, arg7: string, arg8: string, arg9: Array<InvestigationEntry>, arg10: Array<FlightPathPoint>): Promise<bigint> {
+    async addCrashRecord(arg0: bigint, arg1: Coordinate, arg2: string, arg3: string, arg4: Aircraft, arg5: string, arg6: CasualtyData, arg7: string, arg8: string, arg9: Array<InvestigationEntry>, arg10: Array<FlightPathPoint>, arg11: boolean | null, arg12: boolean, arg13: Array<InvolvedAircraft>): Promise<bigint> {
         if (this.processError) {
             try {
-                const result = await this.actor.addCrashRecord(arg0, arg1, arg2, arg3, to_candid_Aircraft_n8(this._uploadFile, this._downloadFile, arg4), arg5, arg6, arg7, arg8, await to_candid_vec_n10(this._uploadFile, this._downloadFile, arg9), to_candid_vec_n15(this._uploadFile, this._downloadFile, arg10));
+                const result = await this.actor.addCrashRecord(arg0, arg1, arg2, arg3, to_candid_Aircraft_n8(this._uploadFile, this._downloadFile, arg4), arg5, arg6, arg7, arg8, await to_candid_vec_n10(this._uploadFile, this._downloadFile, arg9), to_candid_vec_n15(this._uploadFile, this._downloadFile, arg10), to_candid_opt_n18(this._uploadFile, this._downloadFile, arg11), arg12, to_candid_vec_n19(this._uploadFile, this._downloadFile, arg13));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.addCrashRecord(arg0, arg1, arg2, arg3, to_candid_Aircraft_n8(this._uploadFile, this._downloadFile, arg4), arg5, arg6, arg7, arg8, await to_candid_vec_n10(this._uploadFile, this._downloadFile, arg9), to_candid_vec_n15(this._uploadFile, this._downloadFile, arg10));
+            const result = await this.actor.addCrashRecord(arg0, arg1, arg2, arg3, to_candid_Aircraft_n8(this._uploadFile, this._downloadFile, arg4), arg5, arg6, arg7, arg8, await to_candid_vec_n10(this._uploadFile, this._downloadFile, arg9), to_candid_vec_n15(this._uploadFile, this._downloadFile, arg10), to_candid_opt_n18(this._uploadFile, this._downloadFile, arg11), arg12, to_candid_vec_n19(this._uploadFile, this._downloadFile, arg13));
             return result;
         }
     }
@@ -324,139 +340,153 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllCrashRecordsSorted();
-                return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getAllCrashRecordsSorted();
-            return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getAllInvestigationEntries(arg0: bigint): Promise<Array<InvestigationEntry>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllInvestigationEntries(arg0);
-                return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n32(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getAllInvestigationEntries(arg0);
-            return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n32(this._uploadFile, this._downloadFile, result);
         }
     }
     async getCompleteFlightPath(arg0: bigint): Promise<Array<FlightPathPoint> | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.getCompleteFlightPath(arg0);
-                return from_candid_opt_n33(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n42(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCompleteFlightPath(arg0);
-            return from_candid_opt_n33(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n42(this._uploadFile, this._downloadFile, result);
         }
     }
     async getCrashRecord(arg0: bigint): Promise<CrashRecord> {
         if (this.processError) {
             try {
                 const result = await this.actor.getCrashRecord(arg0);
-                return from_candid_CrashRecord_n19(this._uploadFile, this._downloadFile, result);
+                return from_candid_CrashRecord_n23(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCrashRecord(arg0);
-            return from_candid_CrashRecord_n19(this._uploadFile, this._downloadFile, result);
+            return from_candid_CrashRecord_n23(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getCrashRecords(arg0: boolean | null, arg1: boolean | null): Promise<Array<CrashRecord>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCrashRecords(to_candid_opt_n18(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n18(this._uploadFile, this._downloadFile, arg1));
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCrashRecords(to_candid_opt_n18(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n18(this._uploadFile, this._downloadFile, arg1));
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getCrashRecordsByDateRange(arg0: bigint, arg1: bigint): Promise<Array<CrashRecord>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getCrashRecordsByDateRange(arg0, arg1);
-                return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCrashRecordsByDateRange(arg0, arg1);
-            return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getCrashRecordsByPhase(arg0: string): Promise<Array<CrashRecord>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getCrashRecordsByPhase(arg0);
-                return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCrashRecordsByPhase(arg0);
-            return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getInvestigationEntry(arg0: bigint, arg1: bigint): Promise<InvestigationEntry | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.getInvestigationEntry(arg0, arg1);
-                return from_candid_opt_n34(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n43(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getInvestigationEntry(arg0, arg1);
-            return from_candid_opt_n34(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n43(this._uploadFile, this._downloadFile, result);
         }
     }
     async getSurvivorStories(): Promise<Array<CrashRecord>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getSurvivorStories();
-                return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getSurvivorStories();
-            return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async searchCrashRecordsByKeyword(arg0: string): Promise<Array<CrashRecord>> {
         if (this.processError) {
             try {
                 const result = await this.actor.searchCrashRecordsByKeyword(arg0);
-                return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.searchCrashRecordsByKeyword(arg0);
-            return from_candid_vec_n18(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
-    async updateCrashRecord(arg0: bigint, arg1: bigint, arg2: Coordinate, arg3: string, arg4: string, arg5: Aircraft, arg6: string, arg7: CasualtyData, arg8: string, arg9: string, arg10: Array<InvestigationEntry>, arg11: Array<FlightPathPoint>): Promise<void> {
+    async updateCrashRecord(arg0: bigint, arg1: bigint, arg2: Coordinate, arg3: string, arg4: string, arg5: Aircraft, arg6: string, arg7: CasualtyData, arg8: string, arg9: string, arg10: Array<InvestigationEntry>, arg11: Array<FlightPathPoint>, arg12: boolean, arg13: Array<InvolvedAircraft>): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.updateCrashRecord(arg0, arg1, arg2, arg3, arg4, to_candid_Aircraft_n8(this._uploadFile, this._downloadFile, arg5), arg6, arg7, arg8, arg9, await to_candid_vec_n10(this._uploadFile, this._downloadFile, arg10), to_candid_vec_n15(this._uploadFile, this._downloadFile, arg11));
+                const result = await this.actor.updateCrashRecord(arg0, arg1, arg2, arg3, arg4, to_candid_Aircraft_n8(this._uploadFile, this._downloadFile, arg5), arg6, arg7, arg8, arg9, await to_candid_vec_n10(this._uploadFile, this._downloadFile, arg10), to_candid_vec_n15(this._uploadFile, this._downloadFile, arg11), arg12, to_candid_vec_n19(this._uploadFile, this._downloadFile, arg13));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateCrashRecord(arg0, arg1, arg2, arg3, arg4, to_candid_Aircraft_n8(this._uploadFile, this._downloadFile, arg5), arg6, arg7, arg8, arg9, await to_candid_vec_n10(this._uploadFile, this._downloadFile, arg10), to_candid_vec_n15(this._uploadFile, this._downloadFile, arg11));
+            const result = await this.actor.updateCrashRecord(arg0, arg1, arg2, arg3, arg4, to_candid_Aircraft_n8(this._uploadFile, this._downloadFile, arg5), arg6, arg7, arg8, arg9, await to_candid_vec_n10(this._uploadFile, this._downloadFile, arg10), to_candid_vec_n15(this._uploadFile, this._downloadFile, arg11), arg12, to_candid_vec_n19(this._uploadFile, this._downloadFile, arg13));
             return result;
         }
     }
@@ -475,35 +505,41 @@ export class Backend implements backendInterface {
         }
     }
 }
-function from_candid_Aircraft_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Aircraft): Aircraft {
-    return from_candid_record_n32(_uploadFile, _downloadFile, value);
+function from_candid_Aircraft_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Aircraft): Aircraft {
+    return from_candid_record_n39(_uploadFile, _downloadFile, value);
 }
-async function from_candid_CrashRecord_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CrashRecord): Promise<CrashRecord> {
-    return await from_candid_record_n20(_uploadFile, _downloadFile, value);
+async function from_candid_CrashRecord_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CrashRecord): Promise<CrashRecord> {
+    return await from_candid_record_n24(_uploadFile, _downloadFile, value);
 }
-async function from_candid_ExternalBlob_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ExternalBlob): Promise<ExternalBlob> {
+async function from_candid_ExternalBlob_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ExternalBlob): Promise<ExternalBlob> {
     return await _downloadFile(value);
 }
-function from_candid_FlightPathPoint_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _FlightPathPoint): FlightPathPoint {
-    return from_candid_record_n26(_uploadFile, _downloadFile, value);
+function from_candid_FlightPathPoint_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _FlightPathPoint): FlightPathPoint {
+    return from_candid_record_n30(_uploadFile, _downloadFile, value);
 }
-async function from_candid_InvestigationEntry_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _InvestigationEntry): Promise<InvestigationEntry> {
-    return await from_candid_record_n30(_uploadFile, _downloadFile, value);
+async function from_candid_InvestigationEntry_n33(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _InvestigationEntry): Promise<InvestigationEntry> {
+    return await from_candid_record_n34(_uploadFile, _downloadFile, value);
+}
+function from_candid_InvolvedAircraft_n36(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _InvolvedAircraft): InvolvedAircraft {
+    return from_candid_record_n37(_uploadFile, _downloadFile, value);
+}
+function from_candid_VerificationStatus_n40(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _VerificationStatus): VerificationStatus {
+    return from_candid_variant_n41(_uploadFile, _downloadFile, value);
 }
 function from_candid__CaffeineStorageRefillResult_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: __CaffeineStorageRefillResult): _CaffeineStorageRefillResult {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
+function from_candid_opt_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [number]): number | null {
+function from_candid_opt_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [number]): number | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n33(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [Array<_FlightPathPoint>]): Array<FlightPathPoint> | null {
-    return value.length === 0 ? null : from_candid_vec_n24(_uploadFile, _downloadFile, value[0]);
+function from_candid_opt_n42(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [Array<_FlightPathPoint>]): Array<FlightPathPoint> | null {
+    return value.length === 0 ? null : from_candid_vec_n28(_uploadFile, _downloadFile, value[0]);
 }
-async function from_candid_opt_n34(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_InvestigationEntry]): Promise<InvestigationEntry | null> {
-    return value.length === 0 ? null : await from_candid_InvestigationEntry_n29(_uploadFile, _downloadFile, value[0]);
+async function from_candid_opt_n43(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_InvestigationEntry]): Promise<InvestigationEntry | null> {
+    return value.length === 0 ? null : await from_candid_InvestigationEntry_n33(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [boolean]): boolean | null {
     return value.length === 0 ? null : value[0];
@@ -511,7 +547,7 @@ function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 function from_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
     return value.length === 0 ? null : value[0];
 }
-async function from_candid_record_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+async function from_candid_record_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;
     incidentPhotos: Array<_ExternalBlob>;
     status: [] | [string];
@@ -522,13 +558,17 @@ async function from_candid_record_n20(_uploadFile: (file: ExternalBlob) => Promi
     casualties: _CasualtyData;
     lastUpdated: bigint;
     phaseOfFlight: string;
+    isDisasterCrash: boolean;
     flightPath: Array<_FlightPathPoint>;
     investigationTimeline: Array<_InvestigationEntry>;
+    involvedAircraft: Array<_InvolvedAircraft>;
     aircraft: _Aircraft;
     externalReferences: Array<string>;
     airline: string;
     crashDate: bigint;
+    sourceVerification: boolean;
     location: _Coordinate;
+    verificationStatus: _VerificationStatus;
 }): Promise<{
     id: bigint;
     incidentPhotos: Array<ExternalBlob>;
@@ -540,35 +580,43 @@ async function from_candid_record_n20(_uploadFile: (file: ExternalBlob) => Promi
     casualties: CasualtyData;
     lastUpdated: bigint;
     phaseOfFlight: string;
+    isDisasterCrash: boolean;
     flightPath: Array<FlightPathPoint>;
     investigationTimeline: Array<InvestigationEntry>;
+    involvedAircraft: Array<InvolvedAircraft>;
     aircraft: Aircraft;
     externalReferences: Array<string>;
     airline: string;
     crashDate: bigint;
+    sourceVerification: boolean;
     location: Coordinate;
+    verificationStatus: VerificationStatus;
 }> {
     return {
         id: value.id,
-        incidentPhotos: await from_candid_vec_n21(_uploadFile, _downloadFile, value.incidentPhotos),
-        status: record_opt_to_undefined(from_candid_opt_n23(_uploadFile, _downloadFile, value.status)),
+        incidentPhotos: await from_candid_vec_n25(_uploadFile, _downloadFile, value.incidentPhotos),
+        status: record_opt_to_undefined(from_candid_opt_n27(_uploadFile, _downloadFile, value.status)),
         crashCause: value.crashCause,
         source: value.source,
         flightNumber: value.flightNumber,
-        submittingOrganization: record_opt_to_undefined(from_candid_opt_n23(_uploadFile, _downloadFile, value.submittingOrganization)),
+        submittingOrganization: record_opt_to_undefined(from_candid_opt_n27(_uploadFile, _downloadFile, value.submittingOrganization)),
         casualties: value.casualties,
         lastUpdated: value.lastUpdated,
         phaseOfFlight: value.phaseOfFlight,
-        flightPath: from_candid_vec_n24(_uploadFile, _downloadFile, value.flightPath),
-        investigationTimeline: await from_candid_vec_n28(_uploadFile, _downloadFile, value.investigationTimeline),
-        aircraft: from_candid_Aircraft_n31(_uploadFile, _downloadFile, value.aircraft),
+        isDisasterCrash: value.isDisasterCrash,
+        flightPath: from_candid_vec_n28(_uploadFile, _downloadFile, value.flightPath),
+        investigationTimeline: await from_candid_vec_n32(_uploadFile, _downloadFile, value.investigationTimeline),
+        involvedAircraft: from_candid_vec_n35(_uploadFile, _downloadFile, value.involvedAircraft),
+        aircraft: from_candid_Aircraft_n38(_uploadFile, _downloadFile, value.aircraft),
         externalReferences: value.externalReferences,
         airline: value.airline,
         crashDate: value.crashDate,
-        location: value.location
+        sourceVerification: value.sourceVerification,
+        location: value.location,
+        verificationStatus: from_candid_VerificationStatus_n40(_uploadFile, _downloadFile, value.verificationStatus)
     };
 }
-function from_candid_record_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_record_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     altitude: [] | [number];
     speed: [] | [number];
     coordinate: _Coordinate;
@@ -580,13 +628,13 @@ function from_candid_record_n26(_uploadFile: (file: ExternalBlob) => Promise<Uin
     known: boolean;
 } {
     return {
-        altitude: record_opt_to_undefined(from_candid_opt_n27(_uploadFile, _downloadFile, value.altitude)),
-        speed: record_opt_to_undefined(from_candid_opt_n27(_uploadFile, _downloadFile, value.speed)),
+        altitude: record_opt_to_undefined(from_candid_opt_n31(_uploadFile, _downloadFile, value.altitude)),
+        speed: record_opt_to_undefined(from_candid_opt_n31(_uploadFile, _downloadFile, value.speed)),
         coordinate: value.coordinate,
         known: value.known
     };
 }
-async function from_candid_record_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+async function from_candid_record_n34(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;
     title: string;
     tags: Array<string>;
@@ -613,10 +661,28 @@ async function from_candid_record_n30(_uploadFile: (file: ExternalBlob) => Promi
         author: value.author,
         timestamp: value.timestamp,
         mediaUrls: value.mediaUrls,
-        photos: await from_candid_vec_n21(_uploadFile, _downloadFile, value.photos)
+        photos: await from_candid_vec_n25(_uploadFile, _downloadFile, value.photos)
     };
 }
-function from_candid_record_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_record_n37(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    casualties: _CasualtyData;
+    registrationNumber: string;
+    aircraft: _Aircraft;
+    airline: string;
+}): {
+    casualties: CasualtyData;
+    registrationNumber: string;
+    aircraft: Aircraft;
+    airline: string;
+} {
+    return {
+        casualties: value.casualties,
+        registrationNumber: value.registrationNumber,
+        aircraft: from_candid_Aircraft_n38(_uploadFile, _downloadFile, value.aircraft),
+        airline: value.airline
+    };
+}
+function from_candid_record_n39(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     model: string;
     manufacturer: string;
     year: [] | [bigint];
@@ -652,17 +718,29 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
         topped_up_amount: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.topped_up_amount))
     };
 }
-async function from_candid_vec_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_CrashRecord>): Promise<Array<CrashRecord>> {
-    return await Promise.all(value.map(async (x)=>await from_candid_CrashRecord_n19(_uploadFile, _downloadFile, x)));
+function from_candid_variant_n41(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    verified: null;
+} | {
+    unverified: null;
+} | {
+    fantasy: null;
+}): VerificationStatus {
+    return "verified" in value ? VerificationStatus.verified : "unverified" in value ? VerificationStatus.unverified : "fantasy" in value ? VerificationStatus.fantasy : value;
 }
-async function from_candid_vec_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_ExternalBlob>): Promise<Array<ExternalBlob>> {
-    return await Promise.all(value.map(async (x)=>await from_candid_ExternalBlob_n22(_uploadFile, _downloadFile, x)));
+async function from_candid_vec_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_CrashRecord>): Promise<Array<CrashRecord>> {
+    return await Promise.all(value.map(async (x)=>await from_candid_CrashRecord_n23(_uploadFile, _downloadFile, x)));
 }
-function from_candid_vec_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_FlightPathPoint>): Array<FlightPathPoint> {
-    return value.map((x)=>from_candid_FlightPathPoint_n25(_uploadFile, _downloadFile, x));
+async function from_candid_vec_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_ExternalBlob>): Promise<Array<ExternalBlob>> {
+    return await Promise.all(value.map(async (x)=>await from_candid_ExternalBlob_n26(_uploadFile, _downloadFile, x)));
 }
-async function from_candid_vec_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_InvestigationEntry>): Promise<Array<InvestigationEntry>> {
-    return await Promise.all(value.map(async (x)=>await from_candid_InvestigationEntry_n29(_uploadFile, _downloadFile, x)));
+function from_candid_vec_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_FlightPathPoint>): Array<FlightPathPoint> {
+    return value.map((x)=>from_candid_FlightPathPoint_n29(_uploadFile, _downloadFile, x));
+}
+async function from_candid_vec_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_InvestigationEntry>): Promise<Array<InvestigationEntry>> {
+    return await Promise.all(value.map(async (x)=>await from_candid_InvestigationEntry_n33(_uploadFile, _downloadFile, x)));
+}
+function from_candid_vec_n35(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_InvolvedAircraft>): Array<InvolvedAircraft> {
+    return value.map((x)=>from_candid_InvolvedAircraft_n36(_uploadFile, _downloadFile, x));
 }
 function to_candid_Aircraft_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Aircraft): _Aircraft {
     return to_candid_record_n9(_uploadFile, _downloadFile, value);
@@ -676,11 +754,17 @@ function to_candid_FlightPathPoint_n16(_uploadFile: (file: ExternalBlob) => Prom
 async function to_candid_InvestigationEntry_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: InvestigationEntry): Promise<_InvestigationEntry> {
     return await to_candid_record_n12(_uploadFile, _downloadFile, value);
 }
+function to_candid_InvolvedAircraft_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: InvolvedAircraft): _InvolvedAircraft {
+    return to_candid_record_n21(_uploadFile, _downloadFile, value);
+}
 function to_candid__CaffeineStorageRefillInformation_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CaffeineStorageRefillInformation): __CaffeineStorageRefillInformation {
     return to_candid_record_n3(_uploadFile, _downloadFile, value);
 }
 function to_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CaffeineStorageRefillInformation | null): [] | [__CaffeineStorageRefillInformation] {
     return value === null ? candid_none() : candid_some(to_candid__CaffeineStorageRefillInformation_n2(_uploadFile, _downloadFile, value));
+}
+function to_candid_opt_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: boolean | null): [] | [boolean] {
+    return value === null ? candid_none() : candid_some(value);
 }
 async function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;
@@ -730,6 +814,24 @@ function to_candid_record_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         known: value.known
     };
 }
+function to_candid_record_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    casualties: CasualtyData;
+    registrationNumber: string;
+    aircraft: Aircraft;
+    airline: string;
+}): {
+    casualties: _CasualtyData;
+    registrationNumber: string;
+    aircraft: _Aircraft;
+    airline: string;
+} {
+    return {
+        casualties: value.casualties,
+        registrationNumber: value.registrationNumber,
+        aircraft: to_candid_Aircraft_n8(_uploadFile, _downloadFile, value.aircraft),
+        airline: value.airline
+    };
+}
 function to_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     proposed_top_up_amount?: bigint;
 }): {
@@ -771,6 +873,9 @@ async function to_candid_vec_n13(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }
 function to_candid_vec_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<FlightPathPoint>): Array<_FlightPathPoint> {
     return value.map((x)=>to_candid_FlightPathPoint_n16(_uploadFile, _downloadFile, x));
+}
+function to_candid_vec_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<InvolvedAircraft>): Array<_InvolvedAircraft> {
+    return value.map((x)=>to_candid_InvolvedAircraft_n20(_uploadFile, _downloadFile, x));
 }
 export interface CreateActorOptions {
     agent?: Agent;

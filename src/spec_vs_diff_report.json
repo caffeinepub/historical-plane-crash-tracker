@@ -1,53 +1,53 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-21T04:33:23.347Z",
-  "summary": "The implementation provides a comprehensive plane crash tracking application with React/Three.js frontend and Motoko backend. All major requirements are implemented including data entry forms, 3D visualization, interactive maps (placeholder), investigation timelines, crash details, backend data model, dashboard with filtering/search, and professional design theme. However, some acceptance criteria are partially met or implemented as placeholders.",
+  "generatedAt": "2026-02-21T05:19:25.936Z",
+  "summary": "The diff implements most requested requirements for disaster crash tracking, including backend type additions (isDisasterCrash, involvedAircraft with AircraftInvolvement type), validation logic for verified sources, filter parameter support in getCrashRecords with default false, frontend form modifications with disabled checkbox and dynamic aircraft entries, dashboard filter toggle with severity warning modal, hook parameter support, and badge/detail panel displays. However, some acceptance criteria details are missing or not fully evident in the truncated diff.",
   "missing_requirements": [
     {
-      "id": "REQ-3",
-      "requirement": "Create an interactive map visualization using React that displays flight paths for each crash, showing known flight paths as solid lines and speculative/unknown paths as dashed lines with clear labeling indicating 'Speculative Route' or 'Unknown Path'",
-      "reason": "The FlightPathMap component is implemented as a placeholder with a note indicating 'Interactive map visualization with flight path rendering would be implemented here using a mapping library like react-leaflet or mapbox-gl.' The component shows the crash location and legend but does not actually render the interactive map with flight paths",
+      "id": "REQ-22",
+      "requirement": "Error message must clearly state 'Multiple aircraft can only be added for verified sources'",
+      "reason": "The diff shows validation logic in backend/main.mo is truncated. Cannot verify the exact error message text matches the required specification.",
       "evidence": [
-        "frontend/src/components/FlightPathMap.tsx"
+        "backend/main.mo (truncated)"
       ]
     },
     {
-      "id": "REQ-4",
-      "requirement": "Build a 3D crash reconstruction viewer using Three.js and React Three Fiber that displays detailed aircraft models with damage visualization for each crash, allowing users to rotate and view the crash scene from multiple angles with camera controls",
-      "reason": "While a 3D viewer is implemented with Three.js/React Three Fiber, it uses generic geometric shapes (cylinders, boxes) rather than 'detailed aircraft models'. The damage visualization uses scattered debris and color changes based on phase, but does not reflect actual detailed aircraft models specific to each crash type",
+      "id": "REQ-24",
+      "requirement": "Form must validate at least 2 aircraft are entered when disaster crash is checked",
+      "reason": "The CrashRecordForm.tsx shows validation exists ('Disaster crashes must have at least 2 aircraft involved'), but the diff is truncated before showing all validation logic is complete.",
       "evidence": [
-        "frontend/src/components/CrashReconstruction3D.tsx"
+        "frontend/src/components/CrashRecordForm.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-24",
+      "requirement": "Checkbox must have tooltip message when sourceVerification field is empty or false",
+      "reason": "The form shows TooltipProvider import and canEnableDisasterCrash logic, but the actual tooltip implementation with the message is not visible in the truncated diff.",
+      "evidence": [
+        "frontend/src/components/CrashRecordForm.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "requirement": "Warning message must clearly state the content may be graphic or disturbing",
+      "reason": "DashboardPage.tsx shows AlertDialog component and warning logic, but the diff is truncated before showing the actual warning message text to verify it meets the specification.",
+      "evidence": [
+        "frontend/src/pages/DashboardPage.tsx (truncated)"
       ]
     }
   ],
   "hallucinated_features": [],
-  "confidence": 0.85,
+  "confidence": 0.75,
   "changed_files": [
-    "all_files_summary.json",
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/components/AddInvestigationEntryForm.tsx",
     "frontend/src/components/CrashDetailsPanel.tsx",
     "frontend/src/components/CrashListItem.tsx",
-    "frontend/src/components/CrashReconstruction3D.tsx",
     "frontend/src/components/CrashRecordForm.tsx",
-    "frontend/src/components/FlightPathMap.tsx",
-    "frontend/src/components/InvestigationTimeline.tsx",
-    "frontend/src/components/Layout.tsx",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/main.tsx",
-    "frontend/src/pages/AddCrashPage.tsx",
-    "frontend/src/pages/CrashDetailPage.tsx",
     "frontend/src/pages/DashboardPage.tsx",
-    "frontend/src/utils/aircraftModelMapping.ts",
-    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

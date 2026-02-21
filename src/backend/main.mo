@@ -1,17 +1,21 @@
 import Map "mo:core/Map";
 import List "mo:core/List";
-import Runtime "mo:core/Runtime";
-import Time "mo:core/Time";
-import Order "mo:core/Order";
-import Array "mo:core/Array";
+import Nat "mo:core/Nat";
 import Text "mo:core/Text";
+import Time "mo:core/Time";
+import Runtime "mo:core/Runtime";
+import Array "mo:core/Array";
+import Iter "mo:core/Iter";
+import Order "mo:core/Order";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
+import Migration "migration";
 
+// Specify migration function in with-clause
+(with migration = Migration.run)
 actor {
   include MixinStorage();
 
-  // Types for coordinates, entries, path points, aircraft, crash records (with blobs)
   type Coordinate = {
     latitude : Float;
     longitude : Float;
@@ -64,6 +68,19 @@ actor {
     passengerFatalities : Nat;
   };
 
+  type VerificationStatus = {
+    #verified;
+    #unverified;
+    #fantasy;
+  };
+
+  type InvolvedAircraft = {
+    aircraft : Aircraft;
+    airline : Text;
+    casualties : CasualtyData;
+    registrationNumber : Text;
+  };
+
   type CrashRecord = {
     id : Nat;
     crashDate : Int;
@@ -82,7 +99,14 @@ actor {
     lastUpdated : Int;
     incidentPhotos : [Storage.ExternalBlob];
     externalReferences : [Text];
+    verificationStatus : VerificationStatus;
+    sourceVerification : Bool;
+    isDisasterCrash : Bool;
+    involvedAircraft : [InvolvedAircraft];
   };
+
+  let crashRecords = Map.empty<Nat, CrashRecord>();
+  var nextCrashId = 0;
 
   module CrashRecord {
     public func compareByDate(crashRecord1 : CrashRecord, crashRecord2 : CrashRecord) : Order.Order {
@@ -94,8 +118,68 @@ actor {
     };
   };
 
-  let crashRecords = Map.empty<Nat, CrashRecord>();
-  var nextCrashId = 0;
+  public query ({ caller }) func getCrashRecords(includeFantasy : ?Bool, includeDisasterCrashes : ?Bool) : async [CrashRecord] {
+    let includeGenre = switch (includeFantasy) {
+      case (null) { true };
+      case (?value) { value };
+    };
+
+    let includeDisasters = switch (includeDisasterCrashes) {
+      case (null) { false };
+      case (?value) { value };
+    };
+
+    crashRecords.values().toArray().filter(
+      func(record) {
+        let genreCheck = includeGenre or record.verificationStatus != #fantasy;
+        let disasterCheck = includeDisasters or not record.isDisasterCrash;
+        genreCheck and disasterCheck;
+      }
+    );
+  };
+
+  func validatePlaneRegistration(registration : Text) : VerificationStatus {
+    let knownRegistrations : [Text] = [
+      "N12345",
+      "D-ABCD",
+      "VH-XYZ",
+      "G-ABCD",
+      "PT-XYZ",
+      "N45678",
+      "SE-XYZ",
+      "N8082",
+    ];
+
+    let isReal = knownRegistrations.find(
+      func(r) { Text.equal(r, registration) }
+    );
+
+    switch (isReal) {
+      case (null) { #unverified };
+      case (?_) { #verified };
+    };
+  };
+
+  func validateDataSource(url : Text) : Bool {
+    let patterns : [Text] = [
+      "http://",
+      "https://",
+      ".gov",
+      "ntsb.gov",
+      "aviation-safety.net",
+    ];
+
+    let hasValidUrl = patterns.find(
+      func(pattern) {
+        let containsPattern = url.contains(#text pattern);
+        containsPattern;
+      }
+    );
+    switch (hasValidUrl) {
+      case (null) { false };
+      case (?_) { true };
+    };
+  };
 
   public shared ({ caller }) func addCrashRecord(
     crashDate : Int,
@@ -109,9 +193,27 @@ actor {
     source : Text,
     investigationTimeline : [InvestigationEntry],
     flightPath : [FlightPathPoint],
+    isFantasyData : ?Bool,
+    isDisasterCrash : Bool,
+    involvedAircraft : [InvolvedAircraft],
   ) : async Nat {
     let id = nextCrashId;
     nextCrashId += 1;
+
+    if (isDisasterCrash and not validateDataSource(source)) {
+      Runtime.trap("Multiple aircraft incidents require verifiable sources. Please provide a credible source for disaster crashes.");
+    };
+
+    let fantasyFlag = switch (isFantasyData) {
+      case (null) { false };
+      case (?value) { value };
+    };
+
+    let verificationStatus = if (fantasyFlag) {
+      #fantasy;
+    } else {
+      validatePlaneRegistration(aircraft.registrationNumber);
+    };
 
     let newCrashRecord : CrashRecord = {
       id;
@@ -131,7 +233,12 @@ actor {
       lastUpdated = Time.now();
       incidentPhotos = [];
       externalReferences = [];
+      verificationStatus;
+      sourceVerification = validateDataSource(source);
+      isDisasterCrash;
+      involvedAircraft;
     };
+
     crashRecords.add(id, newCrashRecord);
     id;
   };
@@ -159,6 +266,10 @@ actor {
           lastUpdated = Time.now();
           incidentPhotos = updatedPhotos;
           externalReferences = record.externalReferences;
+          verificationStatus = record.verificationStatus;
+          sourceVerification = record.sourceVerification;
+          isDisasterCrash = record.isDisasterCrash;
+          involvedAircraft = record.involvedAircraft;
         };
         crashRecords.add(crashId, updatedRecord);
       };
@@ -206,6 +317,8 @@ actor {
     source : Text,
     investigationTimeline : [InvestigationEntry],
     flightPath : [FlightPathPoint],
+    isDisasterCrash : Bool,
+    involvedAircraft : [InvolvedAircraft],
   ) : async () {
     switch (crashRecords.get(id)) {
       case (null) { Runtime.trap("Crash record not found") };
@@ -228,6 +341,10 @@ actor {
           lastUpdated = Time.now();
           incidentPhotos = [];
           externalReferences = [];
+          verificationStatus = #unverified;
+          sourceVerification = false;
+          isDisasterCrash;
+          involvedAircraft;
         };
         crashRecords.add(id, updatedCrashRecord);
       };
@@ -258,7 +375,6 @@ actor {
     );
   };
 
-  // Investigation timeline functions for entries supporting photos as blob references
   let investigationTimelines = Map.empty<Nat, List.List<InvestigationEntry>>();
   var nextEntryId = 0;
 

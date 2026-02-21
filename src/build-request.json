@@ -1,194 +1,208 @@
 {
   "kind": "build_request",
-  "title": "Build comprehensive historical plane crash tracking application",
+  "title": "Add disaster crash tracking system with multiple aircraft support and severity warning filter",
   "projectName": "Aviation Crash Archive",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Create a manual data entry form for adding plane crash records with fields for: crash date, location (coordinates), airline, flight number, aircraft type, phase of flight, casualties (total aboard, fatalities, survivors), crash cause, and data source attribution (NTSB, ASN, ICAO, etc.)",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-3",
-          "msg-5"
-        ],
-        "quotes": [
-          "a streamlined manual entry system",
-          "Every data source that has crash data"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Form includes all specified fields with appropriate input types",
-        "Data source attribution field allows tracking where information came from",
-        "Form validation ensures required fields are filled before submission",
-        "Successfully submitted crashes are stored in the backend"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Implement automatic aircraft identification that selects and displays the correct aircraft model based on the aircraft type entered in the crash data form",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "No it will be automaticly set to the correct aircraft"
-        ]
-      },
-      "acceptanceCriteria": [
-        "System maintains a mapping between aircraft type names and their corresponding 3D models",
-        "When crash data includes aircraft type, the correct model is automatically selected",
-        "Default/fallback model is used when aircraft type is unknown or not in database"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Create an interactive map visualization using React that displays flight paths for each crash, showing known flight paths as solid lines and speculative/unknown paths as dashed lines with clear labeling indicating 'Speculative Route' or 'Unknown Path'",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-2"
-        ],
-        "quotes": [
-          "Flight path display can be both only the path that is unknown can be labeled as unknown and drawn out by speculation"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Map displays flight paths with different visual styles for known vs. speculative routes",
-        "Speculative routes are clearly labeled as such",
-        "Users can click on crash markers to view details",
-        "Map supports coordinate-based path rendering"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Build a 3D crash reconstruction viewer using Three.js and React Three Fiber that displays detailed aircraft models with damage visualization for each crash, allowing users to rotate and view the crash scene from multiple angles with camera controls",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-3"
-        ],
-        "quotes": [
-          "More detailed aircraft models with damage visualization",
-          "interactive lookalike of what the crash would've looked like from each angle"
-        ]
-      },
-      "acceptanceCriteria": [
-        "3D viewer renders aircraft models with visible damage states",
-        "Users can rotate, zoom, and pan the camera to view from any angle",
-        "Each crash has its own unique aircraft model configuration",
-        "Damage visualization accurately reflects the crash circumstances"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Create a comprehensive investigation timeline component that displays chronological entries for preliminary reports, interim updates, final reports, and safety recommendations, with each entry supporting rich content including text descriptions, embedded images, and video embeds",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-5"
-        ],
-        "quotes": [
-          "investigation logs timeline definitely include specific elements like: preliminary reports, interim updates, final reports, safety recommendations in full level detail and images, text, and video embeds"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Timeline displays entries in chronological order",
-        "Each entry type (preliminary, interim, final, safety recommendations) is visually distinguished",
-        "Timeline entries support text content, image attachments, and video embeds",
-        "Users can expand/collapse detailed entry content"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Implement a crash details view that displays casualty information (total aboard, fatalities, survivors) and documented crash cause for each incident",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "have every single flight have its casualties and the cause of crash"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Casualty statistics are clearly displayed with breakdown of total aboard, fatalities, and survivors",
-        "Crash cause is prominently shown with full description",
-        "Data is stored in backend and retrieved efficiently"
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Design a Motoko backend data model optimized to store and retrieve comprehensive crash records including: basic crash info, flight path coordinates (with known/speculative flags), aircraft details, casualty data, crash causes, and investigation timeline entries, with the structure capable of scaling to handle thousands of historical crash records",
+      "id": "REQ-20",
+      "text": "Add a Boolean field 'isDisasterCrash' to the CrashRecord type in backend/main.mo to track whether multiple aircraft were involved in the crash incident",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-user-disaster-crashes"
         ],
         "quotes": [
-          "All of em"
+          "Add a system if the crash had multiple planes or not"
         ]
       },
       "acceptanceCriteria": [
-        "Data model includes all required fields for crash records",
-        "Flight path coordinates include flags to distinguish known vs. speculative data",
-        "Investigation timeline entries are stored as separate linked records",
-        "Backend provides efficient query methods for retrieving crash data",
-        "Data structure is optimized for large-scale historical data storage"
+        "CrashRecord type includes isDisasterCrash: Bool field",
+        "Field defaults to false for existing crash records"
       ]
     },
     {
-      "id": "REQ-8",
-      "text": "Create a main dashboard view that lists all plane crashes with filtering and search capabilities, allowing users to browse crashes by date, location, airline, aircraft type, or casualty count",
-      "target": "frontend",
+      "id": "REQ-21",
+      "text": "Add an array field 'involvedAircraft' to the CrashRecord type in backend/main.mo to store details about each aircraft involved in disaster crashes, with each entry containing aircraft type, registration number, airline, and casualties for that specific aircraft",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-user-disaster-crashes"
+        ],
+        "quotes": [
+          "if it did you can create it as an option"
         ]
       },
       "acceptanceCriteria": [
-        "Dashboard displays a searchable and filterable list of all crashes",
-        "Users can filter by multiple criteria simultaneously",
-        "Each crash entry in the list shows key summary information",
-        "Clicking a crash entry navigates to its detailed view"
+        "CrashRecord type includes involvedAircraft: [AircraftInvolvement] field",
+        "AircraftInvolvement type includes aircraftType, registration, airline, casualties fields",
+        "Field is an empty array for single-aircraft crashes"
       ]
     },
     {
-      "id": "REQ-9",
-      "text": "Apply a cohesive visual design theme with a professional, data-focused aesthetic using appropriate colors, typography, and layout patterns that convey seriousness and respect for the historical nature of the content, avoiding bright or playful color schemes",
-      "target": "frontend",
+      "id": "REQ-22",
+      "text": "Update the addCrashRecord function in backend/main.mo to validate that multiple aircraft can only be added when sourceVerification is true, rejecting the submission with an error message if sourceVerification is false and isDisasterCrash is true",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-assistant-clarification-response"
+        ],
+        "quotes": [
+          "Add multiple aircraft only if the source is verified"
         ]
       },
       "acceptanceCriteria": [
-        "Color scheme uses subdued, professional tones appropriate for historical tragedy documentation",
-        "Typography is clear and readable for data-heavy content",
-        "Layout provides clear visual hierarchy for complex information",
-        "Design remains consistent across all views and components"
+        "Function rejects disaster crash submissions when sourceVerification is false",
+        "Error message clearly states 'Multiple aircraft can only be added for verified sources'",
+        "Single aircraft crashes are accepted regardless of sourceVerification status"
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "text": "Update the getCrashRecords query in backend/main.mo to accept an optional 'includeDisasterCrashes' Boolean parameter that filters out disaster crashes when set to false, defaulting to false",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-assistant-final-confirmation"
+        ],
+        "quotes": [
+          "Add a 'Show Disaster Crashes' toggle filter similar to the fantasy crashes filter"
+        ]
+      },
+      "acceptanceCriteria": [
+        "getCrashRecords accepts includeDisasterCrashes parameter",
+        "When includeDisasterCrashes is false, crashes with isDisasterCrash=true are filtered out",
+        "Parameter defaults to false when not provided",
+        "Filter works independently from includeFantasy parameter"
+      ]
+    },
+    {
+      "id": "REQ-24",
+      "text": "Update the CrashRecordForm component in frontend/src/components/CrashRecordForm.tsx to add a checkbox labeled 'Multiple Aircraft Involved (Disaster Crash)' that is only enabled when source verification is true, and when checked, displays additional input fields for adding multiple aircraft details",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-assistant-clarification-response"
+        ],
+        "quotes": [
+          "Only allow adding multiple aircraft to a crash if the source is verified"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Checkbox is disabled with tooltip message when sourceVerification field is empty or false",
+        "Checkbox enables when sourceVerification field indicates verified source",
+        "When checked, form displays repeatable aircraft entry fields (type, registration, airline, casualties)",
+        "Users can add/remove aircraft entries dynamically",
+        "Form validates at least 2 aircraft are entered when disaster crash is checked"
+      ]
+    },
+    {
+      "id": "REQ-25",
+      "text": "Add a 'Show Disaster Crashes' toggle checkbox filter to the DashboardPage component in frontend/src/pages/DashboardPage.tsx that filters the crash list to show or hide disaster crashes based on user preference, defaulting to hidden",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-assistant-final-confirmation"
+        ],
+        "quotes": [
+          "Add a 'Show Disaster Crashes' toggle filter in the dashboard (similar to fantasy crashes filter)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Toggle checkbox labeled 'Show Disaster Crashes' added to filter controls",
+        "Filter defaults to unchecked (disaster crashes hidden)",
+        "Toggling the filter updates the crash list immediately",
+        "Filter state persists during the session"
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "text": "Display a prominent severity warning modal or alert in the DashboardPage component when users enable the 'Show Disaster Crashes' filter for the first time, warning about graphic/severe content and requiring user acknowledgment before showing disaster crashes",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-assistant-final-confirmation"
+        ],
+        "quotes": [
+          "Display a prominent severity warning when users enable this filter",
+          "Warning message will inform users about the graphic/severe nature of these crashes and require acknowledgment"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Modal or alert appears when user first checks the disaster crashes filter",
+        "Warning message clearly states the content may be graphic or disturbing",
+        "User must acknowledge with 'I Understand' button before filter takes effect",
+        "If user cancels, the filter remains unchecked",
+        "Acknowledgment is remembered for the session (warning only shows once per session)"
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "text": "Update the useCrashRecords hook in frontend/src/hooks/useQueries.ts to accept an 'includeDisasterCrashes' parameter and pass it to the backend getCrashRecords query",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-assistant-final-confirmation"
+        ],
+        "quotes": [
+          "Add a 'Show Disaster Crashes' toggle filter similar to the fantasy crashes filter"
+        ]
+      },
+      "acceptanceCriteria": [
+        "useCrashRecords hook accepts includeDisasterCrashes Boolean parameter",
+        "Parameter is passed to backend getCrashRecords query",
+        "Hook updates queries when includeDisasterCrashes parameter changes"
+      ]
+    },
+    {
+      "id": "REQ-28",
+      "text": "Update the CrashListItem component in frontend/src/components/CrashListItem.tsx to display a 'Disaster Crash' badge with warning styling when isDisasterCrash is true, showing the number of aircraft involved",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-assistant-final-confirmation"
+        ],
+        "quotes": [
+          "Disaster crashes (multiple aircraft involved)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Badge displays 'Disaster Crash' text with warning icon",
+        "Badge uses distinct warning color (e.g., orange or red accent)",
+        "Badge shows aircraft count (e.g., '3 Aircraft Involved')",
+        "Badge appears alongside existing verification status badges"
+      ]
+    },
+    {
+      "id": "REQ-29",
+      "text": "Update the CrashDetailsPanel component in frontend/src/components/CrashDetailsPanel.tsx to display disaster crash information including a list of all involved aircraft with their details (type, registration, airline, casualties) when isDisasterCrash is true",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-disaster-crashes"
+        ],
+        "quotes": [
+          "if the crash had multiple planes or not"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Panel shows 'Multiple Aircraft Involved' section when isDisasterCrash is true",
+        "Each involved aircraft is listed with type, registration, airline, and casualties",
+        "Total casualties across all aircraft are calculated and displayed",
+        "Section is not shown for single-aircraft crashes"
       ]
     }
   ],
   "constraints": [
-    "Must use React with Three.js for 3D visualizations",
-    "Cannot integrate real-time external APIs for automatic data fetching",
-    "Must use Motoko for backend data storage and logic",
-    "Cannot use external databases like PostgreSQL or MongoDB"
+    "Multiple aircraft entries can only be added when sourceVerification is true",
+    "Disaster crashes must be filtered out by default (includeDisasterCrashes defaults to false)",
+    "The isDisasterCrash field and involvedAircraft array must be added to the existing CrashRecord type without breaking existing data"
   ],
   "nonGoals": [
-    "Real-time automatic data synchronization from external crash databases",
-    "AI-generated crash reconstructions based on text descriptions",
-    "Social media integration or sharing features",
-    "Mobile app versions",
-    "Export functionality to external formats",
-    "User authentication or multi-user collaboration features"
+    "Automatic detection of disaster crashes from external data sources",
+    "Historical migration of existing crashes to mark known disaster crashes",
+    "Cross-referencing involved aircraft registrations between disaster crashes",
+    "Creating a separate disaster crash category distinct from verified/unverified/fantasy statuses"
   ],
   "imageRequirements": {
     "required": [],

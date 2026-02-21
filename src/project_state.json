@@ -1,13 +1,18 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "A comprehensive historical plane crash tracking application with manual data entry system, interactive flight path maps (showing known and speculative routes), automatic aircraft identification, detailed 3D crash reconstructions with damage visualization viewable from multiple angles, investigation timelines with full documentation (preliminary reports, interim updates, final reports, safety recommendations) supporting text/images/videos, casualty tracking, and crash cause analysis. Database optimized to handle all documented historical plane crashes.",
+  "projectStateVersion": 7,
+  "summary": "A comprehensive historical plane crash tracking application with manual data entry system featuring automatic verification of plane registration numbers against real aircraft databases. The system includes interactive flight path maps (showing known and speculative routes), automatic aircraft identification, detailed 3D crash reconstructions with damage visualization viewable from multiple angles, investigation timelines with full documentation (preliminary reports, interim updates, final reports, safety recommendations) supporting text/images/videos, casualty tracking, crash cause analysis, source verification, and multiple aircraft tracking for disaster crashes. Fantasy/fictional crashes are integrated into the main crash list with a toggle filter, maintaining the same detail level as real crashes. Disaster crashes (multiple aircraft involved) can only be created when the source is verified, and include a severity warning filter similar to fantasy crashes. Database optimized to handle all documented historical plane crashes with real/fantasy/disaster classification.",
   "architectural_notes": [
     "Use React with Three.js for 3D aircraft visualization and crash reconstructions",
     "Use Motoko backend for data storage and management",
     "Interactive maps for coordinate-based historical flight path display",
     "Support for multiple media types (text, images, video embeds) in investigation timelines",
-    "Database structure to accommodate data from multiple crash investigation sources"
+    "Database structure to accommodate data from multiple crash investigation sources",
+    "Implement automatic verification system that checks plane registration numbers against aviation databases",
+    "Add real/fantasy classification field to crash records with toggle filter in dashboard",
+    "Source validation system for credibility checking of submitted crash data",
+    "Fantasy crashes maintain full feature parity with real crashes (3D models, timelines, etc.)",
+    "Disaster crash classification tracks multiple aircraft involvement within single crash incidents"
   ],
   "known_issues": [],
   "isFixRequest": false,
@@ -75,6 +80,94 @@
         "REQ-9"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-a-checkbox-field-labeled-mark-as-fantasy-fictional-crash-to-the-crashrecordform-component-that-allows-users-to-explicitly-mark-a-submission-as-fantasy-during-creation",
+      "title": "Add a checkbox field labeled 'Mark as Fantasy/Fictional Crash' to the CrashRecordForm component that allows users to explicitly mark a submission as fantasy during creation",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-crashlistitem-component-to-display-a-verification-badge-that-shows-verified-not-a-real-crash-for-unverified-or-fantasy-fictional-based-on-the-verificationstatus-field-using-distinct-visual-styling-for-each-status",
+      "title": "Update the CrashListItem component to display a verification badge that shows 'Verified', 'Not a Real Crash' (for unverified), or 'Fantasy/Fictional' based on the verificationStatus field, using distinct visual styling for each status",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-toggle-checkbox-filter-labeled-show-fantasy-fictional-crashes-to-the-dashboardpage-component-that-filters-the-crash-list-to-show-or-hide-fantasy-crashes-based-on-user-preference-defaulting-to-hidden",
+      "title": "Add a toggle checkbox filter labeled 'Show Fantasy/Fictional Crashes' to the DashboardPage component that filters the crash list to show or hide fantasy crashes based on user preference, defaulting to hidden",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-usecrashrecords-hook-in-frontend-src-hooks-usequeries-ts-to-accept-an-includefantasy-parameter-and-pass-it-to-the-backend-getcrashrecords-query",
+      "title": "Update the useCrashRecords hook in frontend/src/hooks/useQueries.ts to accept an includeFantasy parameter and pass it to the backend getCrashRecords query",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-source-verification-status-in-the-crashdetailspanel-component-showing-a-checkmark-icon-and-source-verified-text-when-sourceverification-is-true-and-a-warning-icon-with-source-not-verified-when-false",
+      "title": "Display source verification status in the CrashDetailsPanel component, showing a checkmark icon and 'Source Verified' text when sourceVerification is true, and a warning icon with 'Source Not Verified' when false",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-crashrecordform-component-in-frontend-src-components-crashrecordform-tsx-to-add-a-checkbox-labeled-multiple-aircraft-involved-disaster-crash-that-is-only-enabled-when-source-verification-is-true-and-when-checked-displays-additional-input-fields-for-adding-multiple-aircraft-details",
+      "title": "Update the CrashRecordForm component in frontend/src/components/CrashRecordForm.tsx to add a checkbox labeled 'Multiple Aircraft Involved (Disaster Crash)' that is only enabled when source verification is true, and when checked, displays additional input fields for adding multiple aircraft details",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-show-disaster-crashes-toggle-checkbox-filter-to-the-dashboardpage-component-in-frontend-src-pages-dashboardpage-tsx-that-filters-the-crash-list-to-show-or-hide-disaster-crashes-based-on-user-preference-defaulting-to-hidden",
+      "title": "Add a 'Show Disaster Crashes' toggle checkbox filter to the DashboardPage component in frontend/src/pages/DashboardPage.tsx that filters the crash list to show or hide disaster crashes based on user preference, defaulting to hidden",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-a-prominent-severity-warning-modal-or-alert-in-the-dashboardpage-component-when-users-enable-the-show-disaster-crashes-filter-for-the-first-time-warning-about-graphic-severe-content-and-requiring-user-acknowledgment-before-showing-disaster-crashes",
+      "title": "Display a prominent severity warning modal or alert in the DashboardPage component when users enable the 'Show Disaster Crashes' filter for the first time, warning about graphic/severe content and requiring user acknowledgment before showing disaster crashes",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-usecrashrecords-hook-in-frontend-src-hooks-usequeries-ts-to-accept-an-includedisastercrashes-parameter-and-pass-it-to-the-backend-getcrashrecords-query",
+      "title": "Update the useCrashRecords hook in frontend/src/hooks/useQueries.ts to accept an 'includeDisasterCrashes' parameter and pass it to the backend getCrashRecords query",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-crashlistitem-component-in-frontend-src-components-crashlistitem-tsx-to-display-a-disaster-crash-badge-with-warning-styling-when-isdisastercrash-is-true-showing-the-number-of-aircraft-involved",
+      "title": "Update the CrashListItem component in frontend/src/components/CrashListItem.tsx to display a 'Disaster Crash' badge with warning styling when isDisasterCrash is true, showing the number of aircraft involved",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-crashdetailspanel-component-in-frontend-src-components-crashdetailspanel-tsx-to-display-disaster-crash-information-including-a-list-of-all-involved-aircraft-with-their-details-type-registration-airline-casualties-when-isdisastercrash-is-true",
+      "title": "Update the CrashDetailsPanel component in frontend/src/components/CrashDetailsPanel.tsx to display disaster crash information including a list of all involved aircraft with their details (type, registration, airline, casualties) when isDisasterCrash is true",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -125,6 +218,120 @@
       "summary": "Design a Motoko backend data model optimized to store and retrieve comprehensive crash records including: basic crash info, flight path coordinates (with known/speculative flags), aircraft details, casualty data, crash causes, and investigation timeline entries, with the structure capable of scaling to handle thousands of historical crash records",
       "reqIds": [
         "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Automatic verification system that validates plane registration numbers against real aircraft databases and labels unverified/fake registrations as 'Not a Real Crash'",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Fantasy/fictional crash classification system integrated into main crash list with toggle filter to show/hide fantasy crashes",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Source verification system that validates data source URLs/references and cross-references plane registrations against official aviation databases",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Fantasy crashes feature with same detail level as real crashes (3D reconstructions, timelines, investigation reports, etc.)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Extend the CrashRecord type in backend/main.mo to include a verificationStatus field (enum: 'verified', 'unverified', 'fantasy') and a sourceVerification field (Boolean) to track whether the data source URL has been validated",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Create a backend function validatePlaneRegistration in backend/main.mo that checks plane registration numbers against a hardcoded list of known real aircraft registrations and returns a verification status ('verified' or 'unverified')",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Create a backend function validateDataSource in backend/main.mo that performs basic URL validation on data source references (checks for proper URL format and credible domain patterns like .gov, ntsb.gov, aviation-safety.net)",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Update the addCrashRecord function in backend/main.mo to automatically call validatePlaneRegistration and validateDataSource, storing the verification results in the verificationStatus and sourceVerification fields before saving the crash record",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Update the getCrashRecords query in backend/main.mo to accept an optional includeFantasy Boolean parameter that filters out fantasy crashes when set to false",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Multiple aircraft tracking system that allows adding multiple planes to a single crash incident (only when sourceVerification is true)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Disaster crash classification system - crashes marked as disaster crashes when multiple aircraft are involved",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Add 'Show Disaster Crashes' toggle filter to dashboard with severity warning that users must acknowledge before viewing disaster crashes",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Add a Boolean field 'isDisasterCrash' to the CrashRecord type in backend/main.mo to track whether multiple aircraft were involved in the crash incident",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Add an array field 'involvedAircraft' to the CrashRecord type in backend/main.mo to store details about each aircraft involved in disaster crashes, with each entry containing aircraft type, registration number, airline, and casualties for that specific aircraft",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Update the addCrashRecord function in backend/main.mo to validate that multiple aircraft can only be added when sourceVerification is true, rejecting the submission with an error message if sourceVerification is false and isDisasterCrash is true",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Update the getCrashRecords query in backend/main.mo to accept an optional 'includeDisasterCrashes' Boolean parameter that filters out disaster crashes when set to false, defaulting to false",
+      "reqIds": [
+        "REQ-23"
       ],
       "status": "pending"
     }

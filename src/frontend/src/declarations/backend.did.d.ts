@@ -37,13 +37,17 @@ export interface CrashRecord {
   'casualties' : CasualtyData,
   'lastUpdated' : bigint,
   'phaseOfFlight' : string,
+  'isDisasterCrash' : boolean,
   'flightPath' : Array<FlightPathPoint>,
   'investigationTimeline' : Array<InvestigationEntry>,
+  'involvedAircraft' : Array<InvolvedAircraft>,
   'aircraft' : Aircraft,
   'externalReferences' : Array<string>,
   'airline' : string,
   'crashDate' : bigint,
+  'sourceVerification' : boolean,
   'location' : Coordinate,
+  'verificationStatus' : VerificationStatus,
 }
 export type ExternalBlob = Uint8Array;
 export interface FlightPathPoint {
@@ -62,6 +66,15 @@ export interface InvestigationEntry {
   'mediaUrls' : Array<string>,
   'photos' : Array<ExternalBlob>,
 }
+export interface InvolvedAircraft {
+  'casualties' : CasualtyData,
+  'registrationNumber' : string,
+  'aircraft' : Aircraft,
+  'airline' : string,
+}
+export type VerificationStatus = { 'verified' : null } |
+  { 'unverified' : null } |
+  { 'fantasy' : null };
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
   'blob_hash' : string,
@@ -102,6 +115,9 @@ export interface _SERVICE {
       string,
       Array<InvestigationEntry>,
       Array<FlightPathPoint>,
+      [] | [boolean],
+      boolean,
+      Array<InvolvedAircraft>,
     ],
     bigint
   >,
@@ -121,6 +137,10 @@ export interface _SERVICE {
     [] | [Array<FlightPathPoint>]
   >,
   'getCrashRecord' : ActorMethod<[bigint], CrashRecord>,
+  'getCrashRecords' : ActorMethod<
+    [[] | [boolean], [] | [boolean]],
+    Array<CrashRecord>
+  >,
   'getCrashRecordsByDateRange' : ActorMethod<
     [bigint, bigint],
     Array<CrashRecord>
@@ -146,6 +166,8 @@ export interface _SERVICE {
       string,
       Array<InvestigationEntry>,
       Array<FlightPathPoint>,
+      boolean,
+      Array<InvolvedAircraft>,
     ],
     undefined
   >,

@@ -55,6 +55,17 @@ export const FlightPathPoint = IDL.Record({
   'coordinate' : Coordinate,
   'known' : IDL.Bool,
 });
+export const InvolvedAircraft = IDL.Record({
+  'casualties' : CasualtyData,
+  'registrationNumber' : IDL.Text,
+  'aircraft' : Aircraft,
+  'airline' : IDL.Text,
+});
+export const VerificationStatus = IDL.Variant({
+  'verified' : IDL.Null,
+  'unverified' : IDL.Null,
+  'fantasy' : IDL.Null,
+});
 export const CrashRecord = IDL.Record({
   'id' : IDL.Nat,
   'incidentPhotos' : IDL.Vec(ExternalBlob),
@@ -66,13 +77,17 @@ export const CrashRecord = IDL.Record({
   'casualties' : CasualtyData,
   'lastUpdated' : IDL.Int,
   'phaseOfFlight' : IDL.Text,
+  'isDisasterCrash' : IDL.Bool,
   'flightPath' : IDL.Vec(FlightPathPoint),
   'investigationTimeline' : IDL.Vec(InvestigationEntry),
+  'involvedAircraft' : IDL.Vec(InvolvedAircraft),
   'aircraft' : Aircraft,
   'externalReferences' : IDL.Vec(IDL.Text),
   'airline' : IDL.Text,
   'crashDate' : IDL.Int,
+  'sourceVerification' : IDL.Bool,
   'location' : Coordinate,
+  'verificationStatus' : VerificationStatus,
 });
 
 export const idlService = IDL.Service({
@@ -115,6 +130,9 @@ export const idlService = IDL.Service({
         IDL.Text,
         IDL.Vec(InvestigationEntry),
         IDL.Vec(FlightPathPoint),
+        IDL.Opt(IDL.Bool),
+        IDL.Bool,
+        IDL.Vec(InvolvedAircraft),
       ],
       [IDL.Nat],
       [],
@@ -138,6 +156,11 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getCrashRecord' : IDL.Func([IDL.Nat], [CrashRecord], ['query']),
+  'getCrashRecords' : IDL.Func(
+      [IDL.Opt(IDL.Bool), IDL.Opt(IDL.Bool)],
+      [IDL.Vec(CrashRecord)],
+      ['query'],
+    ),
   'getCrashRecordsByDateRange' : IDL.Func(
       [IDL.Int, IDL.Int],
       [IDL.Vec(CrashRecord)],
@@ -173,6 +196,8 @@ export const idlService = IDL.Service({
         IDL.Text,
         IDL.Vec(InvestigationEntry),
         IDL.Vec(FlightPathPoint),
+        IDL.Bool,
+        IDL.Vec(InvolvedAircraft),
       ],
       [],
       [],
@@ -234,6 +259,17 @@ export const idlFactory = ({ IDL }) => {
     'coordinate' : Coordinate,
     'known' : IDL.Bool,
   });
+  const InvolvedAircraft = IDL.Record({
+    'casualties' : CasualtyData,
+    'registrationNumber' : IDL.Text,
+    'aircraft' : Aircraft,
+    'airline' : IDL.Text,
+  });
+  const VerificationStatus = IDL.Variant({
+    'verified' : IDL.Null,
+    'unverified' : IDL.Null,
+    'fantasy' : IDL.Null,
+  });
   const CrashRecord = IDL.Record({
     'id' : IDL.Nat,
     'incidentPhotos' : IDL.Vec(ExternalBlob),
@@ -245,13 +281,17 @@ export const idlFactory = ({ IDL }) => {
     'casualties' : CasualtyData,
     'lastUpdated' : IDL.Int,
     'phaseOfFlight' : IDL.Text,
+    'isDisasterCrash' : IDL.Bool,
     'flightPath' : IDL.Vec(FlightPathPoint),
     'investigationTimeline' : IDL.Vec(InvestigationEntry),
+    'involvedAircraft' : IDL.Vec(InvolvedAircraft),
     'aircraft' : Aircraft,
     'externalReferences' : IDL.Vec(IDL.Text),
     'airline' : IDL.Text,
     'crashDate' : IDL.Int,
+    'sourceVerification' : IDL.Bool,
     'location' : Coordinate,
+    'verificationStatus' : VerificationStatus,
   });
   
   return IDL.Service({
@@ -294,6 +334,9 @@ export const idlFactory = ({ IDL }) => {
           IDL.Text,
           IDL.Vec(InvestigationEntry),
           IDL.Vec(FlightPathPoint),
+          IDL.Opt(IDL.Bool),
+          IDL.Bool,
+          IDL.Vec(InvolvedAircraft),
         ],
         [IDL.Nat],
         [],
@@ -321,6 +364,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getCrashRecord' : IDL.Func([IDL.Nat], [CrashRecord], ['query']),
+    'getCrashRecords' : IDL.Func(
+        [IDL.Opt(IDL.Bool), IDL.Opt(IDL.Bool)],
+        [IDL.Vec(CrashRecord)],
+        ['query'],
+      ),
     'getCrashRecordsByDateRange' : IDL.Func(
         [IDL.Int, IDL.Int],
         [IDL.Vec(CrashRecord)],
@@ -356,6 +404,8 @@ export const idlFactory = ({ IDL }) => {
           IDL.Text,
           IDL.Vec(InvestigationEntry),
           IDL.Vec(FlightPathPoint),
+          IDL.Bool,
+          IDL.Vec(InvolvedAircraft),
         ],
         [],
         [],

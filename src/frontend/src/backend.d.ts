@@ -14,6 +14,29 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
+export interface CrashRecord {
+    id: bigint;
+    incidentPhotos: Array<ExternalBlob>;
+    status?: string;
+    crashCause: string;
+    source: string;
+    flightNumber: string;
+    submittingOrganization?: string;
+    casualties: CasualtyData;
+    lastUpdated: bigint;
+    phaseOfFlight: string;
+    isDisasterCrash: boolean;
+    flightPath: Array<FlightPathPoint>;
+    investigationTimeline: Array<InvestigationEntry>;
+    involvedAircraft: Array<InvolvedAircraft>;
+    aircraft: Aircraft;
+    externalReferences: Array<string>;
+    airline: string;
+    crashDate: bigint;
+    sourceVerification: boolean;
+    location: Coordinate;
+    verificationStatus: VerificationStatus;
+}
 export interface CasualtyData {
     fatalities: bigint;
     totalAboard: bigint;
@@ -24,6 +47,12 @@ export interface CasualtyData {
 export interface Coordinate {
     latitude: number;
     longitude: number;
+}
+export interface InvolvedAircraft {
+    casualties: CasualtyData;
+    registrationNumber: string;
+    aircraft: Aircraft;
+    airline: string;
 }
 export interface Aircraft {
     model: string;
@@ -49,27 +78,13 @@ export interface FlightPathPoint {
     coordinate: Coordinate;
     known: boolean;
 }
-export interface CrashRecord {
-    id: bigint;
-    incidentPhotos: Array<ExternalBlob>;
-    status?: string;
-    crashCause: string;
-    source: string;
-    flightNumber: string;
-    submittingOrganization?: string;
-    casualties: CasualtyData;
-    lastUpdated: bigint;
-    phaseOfFlight: string;
-    flightPath: Array<FlightPathPoint>;
-    investigationTimeline: Array<InvestigationEntry>;
-    aircraft: Aircraft;
-    externalReferences: Array<string>;
-    airline: string;
-    crashDate: bigint;
-    location: Coordinate;
+export enum VerificationStatus {
+    verified = "verified",
+    unverified = "unverified",
+    fantasy = "fantasy"
 }
 export interface backendInterface {
-    addCrashRecord(crashDate: bigint, location: Coordinate, airline: string, flightNumber: string, aircraft: Aircraft, phaseOfFlight: string, casualties: CasualtyData, crashCause: string, source: string, investigationTimeline: Array<InvestigationEntry>, flightPath: Array<FlightPathPoint>): Promise<bigint>;
+    addCrashRecord(crashDate: bigint, location: Coordinate, airline: string, flightNumber: string, aircraft: Aircraft, phaseOfFlight: string, casualties: CasualtyData, crashCause: string, source: string, investigationTimeline: Array<InvestigationEntry>, flightPath: Array<FlightPathPoint>, isFantasyData: boolean | null, isDisasterCrash: boolean, involvedAircraft: Array<InvolvedAircraft>): Promise<bigint>;
     addInvestigationEntry(crashId: bigint, timestamp: bigint, description: string, author: string, mediaUrls: Array<string>): Promise<bigint>;
     attachPhotoToCrashRecord(crashId: bigint, photo: ExternalBlob): Promise<void>;
     attachPhotoToEntry(crashId: bigint, entryId: bigint, photo: ExternalBlob): Promise<void>;
@@ -77,11 +92,12 @@ export interface backendInterface {
     getAllInvestigationEntries(crashId: bigint): Promise<Array<InvestigationEntry>>;
     getCompleteFlightPath(id: bigint): Promise<Array<FlightPathPoint> | null>;
     getCrashRecord(id: bigint): Promise<CrashRecord>;
+    getCrashRecords(includeFantasy: boolean | null, includeDisasterCrashes: boolean | null): Promise<Array<CrashRecord>>;
     getCrashRecordsByDateRange(startTimestamp: bigint, endTimestamp: bigint): Promise<Array<CrashRecord>>;
     getCrashRecordsByPhase(phase: string): Promise<Array<CrashRecord>>;
     getInvestigationEntry(crashId: bigint, entryId: bigint): Promise<InvestigationEntry | null>;
     getSurvivorStories(): Promise<Array<CrashRecord>>;
     searchCrashRecordsByKeyword(keyword: string): Promise<Array<CrashRecord>>;
-    updateCrashRecord(id: bigint, crashDate: bigint, location: Coordinate, airline: string, flightNumber: string, aircraft: Aircraft, phaseOfFlight: string, casualties: CasualtyData, crashCause: string, source: string, investigationTimeline: Array<InvestigationEntry>, flightPath: Array<FlightPathPoint>): Promise<void>;
+    updateCrashRecord(id: bigint, crashDate: bigint, location: Coordinate, airline: string, flightNumber: string, aircraft: Aircraft, phaseOfFlight: string, casualties: CasualtyData, crashCause: string, source: string, investigationTimeline: Array<InvestigationEntry>, flightPath: Array<FlightPathPoint>, isDisasterCrash: boolean, involvedAircraft: Array<InvolvedAircraft>): Promise<void>;
     updateInvestigationEntry(crashId: bigint, entryId: bigint, timestamp: bigint, newTitle: string, newDescription: string): Promise<void>;
 }

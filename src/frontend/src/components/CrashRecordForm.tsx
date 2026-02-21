@@ -5,10 +5,29 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles, AlertTriangle, Plus, X, Info } from 'lucide-react';
 import { getAircraftTypePreview } from '../utils/aircraftModelMapping';
+import type { InvolvedAircraft } from '../backend';
+
+interface AircraftEntry {
+  manufacturer: string;
+  model: string;
+  year: string;
+  registrationNumber: string;
+  ICAOType: string;
+  aircraftType: string;
+  airline: string;
+  totalAboard: string;
+  fatalities: string;
+  survivors: string;
+  crewFatalities: string;
+  passengerFatalities: string;
+}
 
 export default function CrashRecordForm() {
   const navigate = useNavigate();
@@ -36,8 +55,50 @@ export default function CrashRecordForm() {
     source: '',
   });
 
+  const [isFantasy, setIsFantasy] = useState(false);
+  const [isDisasterCrash, setIsDisasterCrash] = useState(false);
+  const [involvedAircraft, setInvolvedAircraft] = useState<AircraftEntry[]>([]);
+
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const isSourceVerified = () => {
+    const source = formData.source.toLowerCase();
+    return source.includes('http://') || 
+           source.includes('https://') || 
+           source.includes('.gov') || 
+           source.includes('ntsb.gov') || 
+           source.includes('aviation-safety.net');
+  };
+
+  const canEnableDisasterCrash = isSourceVerified();
+
+  const addAircraftEntry = () => {
+    setInvolvedAircraft([...involvedAircraft, {
+      manufacturer: '',
+      model: '',
+      year: '',
+      registrationNumber: '',
+      ICAOType: '',
+      aircraftType: '',
+      airline: '',
+      totalAboard: '',
+      fatalities: '',
+      survivors: '',
+      crewFatalities: '',
+      passengerFatalities: '',
+    }]);
+  };
+
+  const removeAircraftEntry = (index: number) => {
+    setInvolvedAircraft(involvedAircraft.filter((_, i) => i !== index));
+  };
+
+  const updateAircraftEntry = (index: number, field: keyof AircraftEntry, value: string) => {
+    const updated = [...involvedAircraft];
+    updated[index][field] = value;
+    setInvolvedAircraft(updated);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,9 +110,34 @@ export default function CrashRecordForm() {
       return;
     }
 
+    if (isDisasterCrash && involvedAircraft.length < 2) {
+      toast.error('Disaster crashes must have at least 2 aircraft involved');
+      return;
+    }
+
     try {
       const crashDate = BigInt(new Date(formData.crashDate).getTime() * 1000000);
       
+      const involvedAircraftData: InvolvedAircraft[] = involvedAircraft.map(aircraft => ({
+        aircraft: {
+          manufacturer: aircraft.manufacturer,
+          model: aircraft.model,
+          year: aircraft.year ? BigInt(aircraft.year) : undefined,
+          registrationNumber: aircraft.registrationNumber,
+          ICAOType: aircraft.ICAOType,
+          aircraftType: aircraft.aircraftType,
+        },
+        airline: aircraft.airline,
+        casualties: {
+          totalAboard: BigInt(aircraft.totalAboard || 0),
+          fatalities: BigInt(aircraft.fatalities || 0),
+          survivors: BigInt(aircraft.survivors || 0),
+          crewFatalities: BigInt(aircraft.crewFatalities || 0),
+          passengerFatalities: BigInt(aircraft.passengerFatalities || 0),
+        },
+        registrationNumber: aircraft.registrationNumber,
+      }));
+
       const id = await addCrashMutation.mutateAsync({
         crashDate,
         location: {
@@ -80,9 +166,18 @@ export default function CrashRecordForm() {
         source: formData.source,
         investigationTimeline: [],
         flightPath: [],
+        isFantasyData: isFantasy,
+        isDisasterCrash,
+        involvedAircraft: involvedAircraftData,
       });
 
-      toast.success('Crash record added successfully');
+      toast.success(
+        isDisasterCrash 
+          ? 'Disaster crash record added successfully' 
+          : isFantasy 
+            ? 'Fantasy crash record added successfully' 
+            : 'Crash record added successfully'
+      );
       navigate({ to: `/crash/${id}` });
     } catch (error) {
       toast.error('Failed to add crash record');
@@ -337,6 +432,178 @@ export default function CrashRecordForm() {
         </div>
       </div>
 
+      {/* Disaster Crash Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Multiple Aircraft Incident</h3>
+        
+        <TooltipProvider>
+          <div className="flex items-center space-x-2 p-4 border rounded-lg bg-muted/30">
+            <Checkbox 
+              id="isDisasterCrash" 
+              checked={isDisasterCrash}
+              onCheckedChange={(checked) => {
+                if (checked && !canEnableDisasterCrash) {
+                  toast.error('Multiple aircraft can only be added for verified sources');
+                  return;
+                }
+                setIsDisasterCrash(checked === true);
+                if (!checked) {
+                  setInvolvedAircraft([]);
+                }
+              }}
+              disabled={!canEnableDisasterCrash}
+            />
+            <div className="flex-1">
+              <Label 
+                htmlFor="isDisasterCrash" 
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2"
+              >
+                <AlertTriangle className="h-4 w-4 text-orange-500" />
+                Multiple Aircraft Involved (Disaster Crash)
+                {!canEnableDisasterCrash && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">
+                        Multiple aircraft can only be added when the data source is verified. 
+                        Please provide a credible source URL (e.g., NTSB, aviation-safety.net).
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Check this box if multiple aircraft were involved in this incident. 
+                {!canEnableDisasterCrash && ' Requires verified source.'}
+              </p>
+            </div>
+          </div>
+        </TooltipProvider>
+
+        {isDisasterCrash && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Add details for each aircraft involved (minimum 2 required)
+              </p>
+              <Button type="button" variant="outline" size="sm" onClick={addAircraftEntry}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Aircraft
+              </Button>
+            </div>
+
+            {involvedAircraft.map((aircraft, index) => (
+              <Card key={index}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">Aircraft {index + 1}</CardTitle>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeAircraftEntry(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Airline</Label>
+                      <Input
+                        placeholder="e.g., United Airlines"
+                        value={aircraft.airline}
+                        onChange={(e) => updateAircraftEntry(index, 'airline', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Registration Number</Label>
+                      <Input
+                        placeholder="e.g., N12345"
+                        value={aircraft.registrationNumber}
+                        onChange={(e) => updateAircraftEntry(index, 'registrationNumber', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Manufacturer</Label>
+                      <Input
+                        placeholder="e.g., Boeing"
+                        value={aircraft.manufacturer}
+                        onChange={(e) => updateAircraftEntry(index, 'manufacturer', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Model</Label>
+                      <Input
+                        placeholder="e.g., 737-800"
+                        value={aircraft.model}
+                        onChange={(e) => updateAircraftEntry(index, 'model', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Aircraft Type</Label>
+                      <Input
+                        placeholder="e.g., Boeing 737"
+                        value={aircraft.aircraftType}
+                        onChange={(e) => updateAircraftEntry(index, 'aircraftType', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>ICAO Type</Label>
+                      <Input
+                        placeholder="e.g., B738"
+                        value={aircraft.ICAOType}
+                        onChange={(e) => updateAircraftEntry(index, 'ICAOType', e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Total Aboard</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={aircraft.totalAboard}
+                        onChange={(e) => updateAircraftEntry(index, 'totalAboard', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Fatalities</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={aircraft.fatalities}
+                        onChange={(e) => updateAircraftEntry(index, 'fatalities', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Survivors</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={aircraft.survivors}
+                        onChange={(e) => updateAircraftEntry(index, 'survivors', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Crash Cause */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Crash Details</h3>
@@ -350,6 +617,26 @@ export default function CrashRecordForm() {
             onChange={(e) => handleChange('crashCause', e.target.value)}
             rows={6}
           />
+        </div>
+
+        <div className="flex items-center space-x-2 p-4 border rounded-lg bg-muted/30">
+          <Checkbox 
+            id="isFantasy" 
+            checked={isFantasy}
+            onCheckedChange={(checked) => setIsFantasy(checked === true)}
+          />
+          <div className="flex-1">
+            <Label 
+              htmlFor="isFantasy" 
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2"
+            >
+              <Sparkles className="h-4 w-4 text-purple-500" />
+              Mark as Fantasy/Fictional Crash
+            </Label>
+            <p className="text-xs text-muted-foreground mt-1">
+              Check this box if this is a fictional or hypothetical crash scenario. Fantasy crashes will bypass automatic verification.
+            </p>
+          </div>
         </div>
       </div>
 

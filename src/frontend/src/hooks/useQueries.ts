@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { CrashRecord, InvestigationEntry, Coordinate, Aircraft, CasualtyData, FlightPathPoint, ExternalBlob } from '../backend';
+import type { CrashRecord, InvestigationEntry, Coordinate, Aircraft, CasualtyData, FlightPathPoint, ExternalBlob, InvolvedAircraft } from '../backend';
 
 // Query keys
 const QUERY_KEYS = {
-  allCrashes: ['crashes', 'all'],
+  allCrashes: (includeFantasy: boolean, includeDisasterCrashes: boolean) => ['crashes', 'all', includeFantasy, includeDisasterCrashes],
   crash: (id: number) => ['crashes', id],
   crashesByDateRange: (start: bigint, end: bigint) => ['crashes', 'dateRange', start.toString(), end.toString()],
   crashesByPhase: (phase: string) => ['crashes', 'phase', phase],
@@ -15,11 +15,24 @@ const QUERY_KEYS = {
 };
 
 // Crash Record Queries
+export function useCrashRecords(includeFantasy: boolean = false, includeDisasterCrashes: boolean = false) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<CrashRecord[]>({
+    queryKey: QUERY_KEYS.allCrashes(includeFantasy, includeDisasterCrashes),
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getCrashRecords(includeFantasy, includeDisasterCrashes);
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useGetAllCrashRecords() {
   const { actor, isFetching } = useActor();
 
   return useQuery<CrashRecord[]>({
-    queryKey: QUERY_KEYS.allCrashes,
+    queryKey: QUERY_KEYS.allCrashes(false, false),
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAllCrashRecordsSorted();
@@ -124,6 +137,9 @@ export function useAddCrashRecord() {
       source: string;
       investigationTimeline: InvestigationEntry[];
       flightPath: FlightPathPoint[];
+      isFantasyData?: boolean;
+      isDisasterCrash?: boolean;
+      involvedAircraft?: InvolvedAircraft[];
     }) => {
       if (!actor) throw new Error('Actor not initialized');
       return actor.addCrashRecord(
@@ -137,11 +153,14 @@ export function useAddCrashRecord() {
         data.crashCause,
         data.source,
         data.investigationTimeline,
-        data.flightPath
+        data.flightPath,
+        data.isFantasyData ?? null,
+        data.isDisasterCrash ?? false,
+        data.involvedAircraft ?? []
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.allCrashes });
+      queryClient.invalidateQueries({ queryKey: ['crashes'] });
     },
   });
 }
@@ -164,6 +183,8 @@ export function useUpdateCrashRecord() {
       source: string;
       investigationTimeline: InvestigationEntry[];
       flightPath: FlightPathPoint[];
+      isDisasterCrash: boolean;
+      involvedAircraft: InvolvedAircraft[];
     }) => {
       if (!actor) throw new Error('Actor not initialized');
       return actor.updateCrashRecord(
@@ -178,11 +199,13 @@ export function useUpdateCrashRecord() {
         data.crashCause,
         data.source,
         data.investigationTimeline,
-        data.flightPath
+        data.flightPath,
+        data.isDisasterCrash,
+        data.involvedAircraft
       );
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.allCrashes });
+      queryClient.invalidateQueries({ queryKey: ['crashes'] });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.crash(Number(variables.id)) });
     },
   });
