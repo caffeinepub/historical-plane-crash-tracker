@@ -1,0 +1,197 @@
+{
+  "kind": "build_request",
+  "title": "Build comprehensive historical plane crash tracking application",
+  "projectName": "Aviation Crash Archive",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create a manual data entry form for adding plane crash records with fields for: crash date, location (coordinates), airline, flight number, aircraft type, phase of flight, casualties (total aboard, fatalities, survivors), crash cause, and data source attribution (NTSB, ASN, ICAO, etc.)",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1",
+          "msg-3",
+          "msg-5"
+        ],
+        "quotes": [
+          "a streamlined manual entry system",
+          "Every data source that has crash data"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Form includes all specified fields with appropriate input types",
+        "Data source attribution field allows tracking where information came from",
+        "Form validation ensures required fields are filled before submission",
+        "Successfully submitted crashes are stored in the backend"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement automatic aircraft identification that selects and displays the correct aircraft model based on the aircraft type entered in the crash data form",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "No it will be automaticly set to the correct aircraft"
+        ]
+      },
+      "acceptanceCriteria": [
+        "System maintains a mapping between aircraft type names and their corresponding 3D models",
+        "When crash data includes aircraft type, the correct model is automatically selected",
+        "Default/fallback model is used when aircraft type is unknown or not in database"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Create an interactive map visualization using React that displays flight paths for each crash, showing known flight paths as solid lines and speculative/unknown paths as dashed lines with clear labeling indicating 'Speculative Route' or 'Unknown Path'",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1",
+          "msg-2"
+        ],
+        "quotes": [
+          "Flight path display can be both only the path that is unknown can be labeled as unknown and drawn out by speculation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Map displays flight paths with different visual styles for known vs. speculative routes",
+        "Speculative routes are clearly labeled as such",
+        "Users can click on crash markers to view details",
+        "Map supports coordinate-based path rendering"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Build a 3D crash reconstruction viewer using Three.js and React Three Fiber that displays detailed aircraft models with damage visualization for each crash, allowing users to rotate and view the crash scene from multiple angles with camera controls",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1",
+          "msg-3"
+        ],
+        "quotes": [
+          "More detailed aircraft models with damage visualization",
+          "interactive lookalike of what the crash would've looked like from each angle"
+        ]
+      },
+      "acceptanceCriteria": [
+        "3D viewer renders aircraft models with visible damage states",
+        "Users can rotate, zoom, and pan the camera to view from any angle",
+        "Each crash has its own unique aircraft model configuration",
+        "Damage visualization accurately reflects the crash circumstances"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Create a comprehensive investigation timeline component that displays chronological entries for preliminary reports, interim updates, final reports, and safety recommendations, with each entry supporting rich content including text descriptions, embedded images, and video embeds",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1",
+          "msg-5"
+        ],
+        "quotes": [
+          "investigation logs timeline definitely include specific elements like: preliminary reports, interim updates, final reports, safety recommendations in full level detail and images, text, and video embeds"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Timeline displays entries in chronological order",
+        "Each entry type (preliminary, interim, final, safety recommendations) is visually distinguished",
+        "Timeline entries support text content, image attachments, and video embeds",
+        "Users can expand/collapse detailed entry content"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Implement a crash details view that displays casualty information (total aboard, fatalities, survivors) and documented crash cause for each incident",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "have every single flight have its casualties and the cause of crash"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Casualty statistics are clearly displayed with breakdown of total aboard, fatalities, and survivors",
+        "Crash cause is prominently shown with full description",
+        "Data is stored in backend and retrieved efficiently"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Design a Motoko backend data model optimized to store and retrieve comprehensive crash records including: basic crash info, flight path coordinates (with known/speculative flags), aircraft details, casualty data, crash causes, and investigation timeline entries, with the structure capable of scaling to handle thousands of historical crash records",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "All of em"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Data model includes all required fields for crash records",
+        "Flight path coordinates include flags to distinguish known vs. speculative data",
+        "Investigation timeline entries are stored as separate linked records",
+        "Backend provides efficient query methods for retrieving crash data",
+        "Data structure is optimized for large-scale historical data storage"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Create a main dashboard view that lists all plane crashes with filtering and search capabilities, allowing users to browse crashes by date, location, airline, aircraft type, or casualty count",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard displays a searchable and filterable list of all crashes",
+        "Users can filter by multiple criteria simultaneously",
+        "Each crash entry in the list shows key summary information",
+        "Clicking a crash entry navigates to its detailed view"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Apply a cohesive visual design theme with a professional, data-focused aesthetic using appropriate colors, typography, and layout patterns that convey seriousness and respect for the historical nature of the content, avoiding bright or playful color schemes",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Color scheme uses subdued, professional tones appropriate for historical tragedy documentation",
+        "Typography is clear and readable for data-heavy content",
+        "Layout provides clear visual hierarchy for complex information",
+        "Design remains consistent across all views and components"
+      ]
+    }
+  ],
+  "constraints": [
+    "Must use React with Three.js for 3D visualizations",
+    "Cannot integrate real-time external APIs for automatic data fetching",
+    "Must use Motoko for backend data storage and logic",
+    "Cannot use external databases like PostgreSQL or MongoDB"
+  ],
+  "nonGoals": [
+    "Real-time automatic data synchronization from external crash databases",
+    "AI-generated crash reconstructions based on text descriptions",
+    "Social media integration or sharing features",
+    "Mobile app versions",
+    "Export functionality to external formats",
+    "User authentication or multi-user collaboration features"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

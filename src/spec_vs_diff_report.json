@@ -1,0 +1,53 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-21T04:33:23.347Z",
+  "summary": "The implementation provides a comprehensive plane crash tracking application with React/Three.js frontend and Motoko backend. All major requirements are implemented including data entry forms, 3D visualization, interactive maps (placeholder), investigation timelines, crash details, backend data model, dashboard with filtering/search, and professional design theme. However, some acceptance criteria are partially met or implemented as placeholders.",
+  "missing_requirements": [
+    {
+      "id": "REQ-3",
+      "requirement": "Create an interactive map visualization using React that displays flight paths for each crash, showing known flight paths as solid lines and speculative/unknown paths as dashed lines with clear labeling indicating 'Speculative Route' or 'Unknown Path'",
+      "reason": "The FlightPathMap component is implemented as a placeholder with a note indicating 'Interactive map visualization with flight path rendering would be implemented here using a mapping library like react-leaflet or mapbox-gl.' The component shows the crash location and legend but does not actually render the interactive map with flight paths",
+      "evidence": [
+        "frontend/src/components/FlightPathMap.tsx"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Build a 3D crash reconstruction viewer using Three.js and React Three Fiber that displays detailed aircraft models with damage visualization for each crash, allowing users to rotate and view the crash scene from multiple angles with camera controls",
+      "reason": "While a 3D viewer is implemented with Three.js/React Three Fiber, it uses generic geometric shapes (cylinders, boxes) rather than 'detailed aircraft models'. The damage visualization uses scattered debris and color changes based on phase, but does not reflect actual detailed aircraft models specific to each crash type",
+      "evidence": [
+        "frontend/src/components/CrashReconstruction3D.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [],
+  "confidence": 0.85,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AddInvestigationEntryForm.tsx",
+    "frontend/src/components/CrashDetailsPanel.tsx",
+    "frontend/src/components/CrashListItem.tsx",
+    "frontend/src/components/CrashReconstruction3D.tsx",
+    "frontend/src/components/CrashRecordForm.tsx",
+    "frontend/src/components/FlightPathMap.tsx",
+    "frontend/src/components/InvestigationTimeline.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/AddCrashPage.tsx",
+    "frontend/src/pages/CrashDetailPage.tsx",
+    "frontend/src/pages/DashboardPage.tsx",
+    "frontend/src/utils/aircraftModelMapping.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

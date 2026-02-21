@@ -1,2 +1,3 @@
-# historical-plane-crash-tracker
-Exported from Caffeine project: Historical Plane Crash Tracker
+## Historical Plane Crash Tracker
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

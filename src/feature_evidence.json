@@ -1,0 +1,171 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-a-manual-data-entry-form-for-adding-plane-crash-records-with-fields-for-crash-date-location-coordinates-airline-flight-number-aircraft-type-phase-of-flight-casualties-total-aboard-fatalities-survivors-crash-cause-and-data-source-attribution-ntsb-asn-icao-etc",
+      "featureTitle": "Create a manual data entry form for adding plane crash records with fields for: crash date, location (coordinates), airline, flight number, aircraft type, phase of flight, casualties (total aboard, fatalities, survivors), crash cause, and data source attribution (NTSB, ASN, ICAO, etc.)",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/CrashRecordForm.tsx",
+        "frontend/src/pages/AddCrashPage.tsx"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-automatic-aircraft-identification-that-selects-and-displays-the-correct-aircraft-model-based-on-the-aircraft-type-entered-in-the-crash-data-form",
+      "featureTitle": "Implement automatic aircraft identification that selects and displays the correct aircraft model based on the aircraft type entered in the crash data form",
+      "files": [
+        "frontend/src/components/CrashRecordForm.tsx",
+        "frontend/src/utils/aircraftModelMapping.ts"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-an-interactive-map-visualization-using-react-that-displays-flight-paths-for-each-crash-showing-known-flight-paths-as-solid-lines-and-speculative-unknown-paths-as-dashed-lines-with-clear-labeling-indicating-speculative-route-or-unknown-path",
+      "featureTitle": "Create an interactive map visualization using React that displays flight paths for each crash, showing known flight paths as solid lines and speculative/unknown paths as dashed lines with clear labeling indicating 'Speculative Route' or 'Unknown Path'",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/FlightPathMap.tsx",
+        "frontend/src/pages/CrashDetailPage.tsx"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-3d-crash-reconstruction-viewer-using-three-js-and-react-three-fiber-that-displays-detailed-aircraft-models-with-damage-visualization-for-each-crash-allowing-users-to-rotate-and-view-the-crash-scene-from-multiple-angles-with-camera-controls",
+      "featureTitle": "Build a 3D crash reconstruction viewer using Three.js and React Three Fiber that displays detailed aircraft models with damage visualization for each crash, allowing users to rotate and view the crash scene from multiple angles with camera controls",
+      "files": [
+        "frontend/src/components/CrashReconstruction3D.tsx",
+        "frontend/src/pages/CrashDetailPage.tsx"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-comprehensive-investigation-timeline-component-that-displays-chronological-entries-for-preliminary-reports-interim-updates-final-reports-and-safety-recommendations-with-each-entry-supporting-rich-content-including-text-descriptions-embedded-images-and-video-embeds",
+      "featureTitle": "Create a comprehensive investigation timeline component that displays chronological entries for preliminary reports, interim updates, final reports, and safety recommendations, with each entry supporting rich content including text descriptions, embedded images, and video embeds",
+      "files": [
+        "frontend/src/components/AddInvestigationEntryForm.tsx",
+        "frontend/src/components/InvestigationTimeline.tsx",
+        "frontend/src/pages/CrashDetailPage.tsx"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-crash-details-view-that-displays-casualty-information-total-aboard-fatalities-survivors-and-documented-crash-cause-for-each-incident",
+      "featureTitle": "Implement a crash details view that displays casualty information (total aboard, fatalities, survivors) and documented crash cause for each incident",
+      "files": [
+        "frontend/src/components/CrashDetailsPanel.tsx",
+        "frontend/src/pages/CrashDetailPage.tsx"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-main-dashboard-view-that-lists-all-plane-crashes-with-filtering-and-search-capabilities-allowing-users-to-browse-crashes-by-date-location-airline-aircraft-type-or-casualty-count",
+      "featureTitle": "Create a main dashboard view that lists all plane crashes with filtering and search capabilities, allowing users to browse crashes by date, location, airline, aircraft type, or casualty count",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/CrashListItem.tsx",
+        "frontend/src/pages/DashboardPage.tsx"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-a-cohesive-visual-design-theme-with-a-professional-data-focused-aesthetic-using-appropriate-colors-typography-and-layout-patterns-that-convey-seriousness-and-respect-for-the-historical-nature-of-the-content-avoiding-bright-or-playful-color-schemes",
+      "featureTitle": "Apply a cohesive visual design theme with a professional, data-focused aesthetic using appropriate colors, typography, and layout patterns that convey seriousness and respect for the historical nature of the content, avoiding bright or playful color schemes",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

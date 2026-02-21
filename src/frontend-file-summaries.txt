@@ -1,0 +1,18 @@
+{
+  "frontend/src/App.tsx": "Main application component with TanStack Router setup, defining routes for dashboard, add crash, and crash detail pages, wrapped with ThemeProvider and Toaster for notifications.",
+  "frontend/src/components/Layout.tsx": "Application layout component providing consistent header with navigation, main content area, and footer with data source attribution and caffeine.ai branding.",
+  "frontend/src/pages/DashboardPage.tsx": "Main dashboard displaying crash statistics, search/filter controls, and a list of all crash records with sorting and filtering capabilities.",
+  "frontend/src/pages/AddCrashPage.tsx": "Page wrapper for the crash record form, providing navigation and context for adding new crash data.",
+  "frontend/src/pages/CrashDetailPage.tsx": "Detailed crash view page displaying comprehensive crash information with tabs for flight path map, 3D reconstruction, and investigation timeline.",
+  "frontend/src/components/CrashRecordForm.tsx": "Comprehensive form component for manual data entry of crash records including all required fields (date, location, aircraft, casualties, cause) with validation and aircraft type preview.",
+  "frontend/src/components/CrashListItem.tsx": "Reusable card component displaying crash summary information in a clickable format with casualty statistics and key details.",
+  "frontend/src/components/CrashDetailsPanel.tsx": "Component displaying detailed casualty statistics, aircraft information, and crash cause with visual progress indicators and organized layout.",
+  "frontend/src/components/FlightPathMap.tsx": "Flight path visualization component with placeholder for interactive map implementation, showing crash location and distinguishing known vs speculative route segments.",
+  "frontend/src/components/CrashReconstruction3D.tsx": "Interactive 3D crash reconstruction viewer using React Three Fiber, displaying aircraft models with damage visualization based on crash phase, with camera controls.",
+  "frontend/src/components/InvestigationTimeline.tsx": "Chronological timeline component displaying investigation entries with support for tags, photos, videos, and expandable content, plus dialog for adding new entries.",
+  "frontend/src/components/AddInvestigationEntryForm.tsx": "Form component for adding investigation timeline entries with support for timestamps, descriptions, tags, photo uploads, and media URLs with progress tracking.",
+  "frontend/src/utils/aircraftModelMapping.ts": "Utility module mapping aircraft type strings to 3D model identifiers with fallback to generic model and preview functionality.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including crash record CRUD, investigation timeline management, and photo attachments with proper cache invalidation.",
+  "frontend/src/index.css": "Global styles with professional OKLCH color system using subdued slate blues and grays appropriate for historical tragedy documentation, with both light and dark mode support.",
+  "frontend/tailwind.config.js": "Tailwind configuration with custom color palette, typography settings (Inter font), subtle border radius, and soft shadows for a professional data-focused aesthetic."
+}

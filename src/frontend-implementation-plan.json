@@ -1,0 +1,216 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Aviation Crash Archive - Frontend Implementation Plan",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Create manual data entry form for adding comprehensive plane crash records with all required fields including crash details, aircraft information, casualties, and data source attribution",
+      "acceptanceCriteria": [
+        "Form includes all specified fields with appropriate input types",
+        "Data source attribution field allows tracking where information came from",
+        "Form validation ensures required fields are filled before submission",
+        "Successfully submitted crashes are stored in the backend"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CrashRecordForm.tsx",
+          "operation": "create",
+          "description": "Create a comprehensive form component for crash record data entry. Include fields for crash date (date picker), location coordinates (latitude/longitude number inputs), airline (text), flight number (text), aircraft details (manufacturer, model, type, registration, ICAO type, year), phase of flight (select/dropdown), casualty data (total aboard, fatalities, survivors, crew fatalities, passenger fatalities as number inputs), crash cause (textarea), and data source attribution (text input with helper text for NTSB, ASN, ICAO references). Implement form validation using React Hook Form or native validation. On submit, call backend.addCrashRecord with properly formatted data including empty arrays for investigationTimeline and flightPath initially. Display success/error feedback. Use shadcn/ui form components for consistent styling."
+        },
+        {
+          "path": "frontend/src/pages/AddCrashPage.tsx",
+          "operation": "create",
+          "description": "Create a page wrapper that renders the CrashRecordForm component. Include a page title 'Add Crash Record' and provide navigation back to the dashboard after successful submission. Handle loading states and error boundaries appropriately."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add route for /add-crash that renders AddCrashPage. Ensure the route is accessible from the main navigation or dashboard."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Implement automatic aircraft identification that selects and displays the correct aircraft model based on aircraft type entered in crash data form",
+      "acceptanceCriteria": [
+        "System maintains a mapping between aircraft type names and their corresponding 3D models",
+        "When crash data includes aircraft type, the correct model is automatically selected",
+        "Default/fallback model is used when aircraft type is unknown or not in database"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/aircraftModelMapping.ts",
+          "operation": "create",
+          "description": "Create a mapping utility that associates aircraft type strings (e.g., 'Boeing 737', 'Airbus A320') with their corresponding 3D model file paths or identifiers. Include a function getModelForAircraftType(aircraftType: string) that returns the appropriate model identifier, with a fallback to a generic aircraft model when the type is not found in the mapping. Export the mapping and lookup function for use in the 3D viewer component."
+        },
+        {
+          "path": "frontend/src/components/CrashRecordForm.tsx",
+          "operation": "modify",
+          "description": "Add real-time preview or indicator that shows which aircraft model will be selected based on the aircraft type field input. Display the matched model name or show 'Using generic model' for unmapped types. This provides immediate feedback to users during data entry."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Create interactive map visualization displaying flight paths with known routes shown as solid lines and speculative/unknown paths as dashed lines with clear labeling",
+      "acceptanceCriteria": [
+        "Map displays flight paths with different visual styles for known vs. speculative routes",
+        "Speculative routes are clearly labeled as such",
+        "Users can click on crash markers to view details",
+        "Map supports coordinate-based path rendering"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/FlightPathMap.tsx",
+          "operation": "create",
+          "description": "Create an interactive map component using a React mapping library (e.g., react-leaflet or react-map-gl). Accept a CrashRecord as a prop. Render the crash location as a marker. Render the flight path by iterating through FlightPathPoint[] and drawing lines between coordinates. Use solid lines for points where known=true and dashed lines for known=false. Add labels 'Speculative Route' or 'Unknown Path' for dashed segments using map overlays or tooltips. Make crash markers clickable to open a popup or navigate to the crash detail page. Support zoom and pan controls."
+        },
+        {
+          "path": "frontend/src/pages/CrashDetailPage.tsx",
+          "operation": "create",
+          "description": "Create a detailed crash view page that fetches a single CrashRecord by ID using backend.getCrashRecord. Display all crash information in organized sections. Include the FlightPathMap component to visualize the flight path. Include sections for crash details, casualty information, aircraft details, and investigation timeline (initially as a placeholder until REQ-5 is implemented). Add navigation back to the dashboard."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add route for /crash/:id that renders CrashDetailPage with the crash ID from URL params."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Build 3D crash reconstruction viewer using Three.js and React Three Fiber to display detailed aircraft models with damage visualization and camera controls",
+      "acceptanceCriteria": [
+        "3D viewer renders aircraft models with visible damage states",
+        "Users can rotate, zoom, and pan the camera to view from any angle",
+        "Each crash has its own unique aircraft model configuration",
+        "Damage visualization accurately reflects the crash circumstances"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CrashReconstruction3D.tsx",
+          "operation": "create",
+          "description": "Create a 3D viewer component using React Three Fiber and Three.js. Accept a CrashRecord prop to determine which aircraft model to load using the aircraftModelMapping utility. Set up a Canvas with appropriate lighting (ambient, directional). Load the appropriate aircraft 3D model (GLTF/GLB format). Apply damage visualization by modifying materials, adding crack/damage textures, or positioning broken pieces based on crash data (phase of flight, crash cause). Implement OrbitControls to allow users to rotate, zoom, and pan the camera around the scene. Include a reset camera button. Handle loading states while the 3D model loads."
+        },
+        {
+          "path": "frontend/src/pages/CrashDetailPage.tsx",
+          "operation": "modify",
+          "description": "Add the CrashReconstruction3D component to the crash detail page in a dedicated section titled '3D Reconstruction'. Position it prominently alongside other crash information. Ensure the 3D viewer has adequate height (e.g., 500-600px) for comfortable viewing."
+        },
+        {
+          "path": "frontend/public/models/",
+          "operation": "create",
+          "description": "Create a models directory to store 3D aircraft model files (GLTF/GLB format). Include at least a generic aircraft model as the default fallback. Add specific models for common aircraft types referenced in the aircraftModelMapping. Ensure models are optimized for web viewing with appropriate polygon counts."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Create comprehensive investigation timeline component displaying chronological entries for reports and recommendations with rich content support including text, images, and video embeds",
+      "acceptanceCriteria": [
+        "Timeline displays entries in chronological order",
+        "Each entry type (preliminary, interim, final, safety recommendations) is visually distinguished",
+        "Timeline entries support text content, image attachments, and video embeds",
+        "Users can expand/collapse detailed entry content"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/InvestigationTimeline.tsx",
+          "operation": "create",
+          "description": "Create a timeline component that accepts an array of InvestigationEntry objects. Sort entries by timestamp in chronological order. Render each entry with a vertical timeline visualization showing date/time, title, author, and description. Distinguish entry types by tags (use the tags array from InvestigationEntry) with different colors/icons for preliminary, interim, final, and safety recommendations. Display photos using ExternalBlob.getDirectURL() for each photo in the photos array. Render video embeds from mediaUrls as iframe embeds (YouTube, Vimeo) or native video elements. Implement expand/collapse functionality for long descriptions. Use the blob-storage component for displaying photos: verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/AddInvestigationEntryForm.tsx",
+          "operation": "create",
+          "description": "Create a form component for adding new investigation timeline entries. Include fields for timestamp (date/time picker), title (text), description (textarea with rich text support), author (text), tags (multi-select for preliminary/interim/final/safety recommendations), photos (file upload accepting images), and mediaUrls (text inputs for video URLs). On submit, call backend.addInvestigationEntry for the basic entry, then use backend.attachPhotoToEntry for each uploaded photo. Use ExternalBlob.fromBytes for photo uploads with progress tracking via withUploadProgress. Verify the blob-storage component's usage instructions before implementing file uploads."
+        },
+        {
+          "path": "frontend/src/pages/CrashDetailPage.tsx",
+          "operation": "modify",
+          "description": "Add the InvestigationTimeline component to display the investigation timeline from the CrashRecord. Add a button or section to open the AddInvestigationEntryForm in a modal or slide-out panel. Refresh the timeline after new entries are added."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Implement crash details view displaying casualty information breakdown and documented crash cause",
+      "acceptanceCriteria": [
+        "Casualty statistics are clearly displayed with breakdown of total aboard, fatalities, and survivors",
+        "Crash cause is prominently shown with full description",
+        "Data is stored in backend and retrieved efficiently"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CrashDetailsPanel.tsx",
+          "operation": "create",
+          "description": "Create a component that accepts a CrashRecord and displays the casualty information in a clear, structured format. Show totalAboard, fatalities, survivors, passengerFatalities, and crewFatalities using data visualization (progress bars, pie charts, or stat cards). Display the crashCause prominently in a separate section with appropriate typography (larger font, bold heading). Include contextual information like phase of flight, airline, flight number, and crash date. Use subdued, respectful styling appropriate for the sensitive nature of the content."
+        },
+        {
+          "path": "frontend/src/pages/CrashDetailPage.tsx",
+          "operation": "modify",
+          "description": "Integrate the CrashDetailsPanel component near the top of the crash detail page, making it one of the first pieces of information users see. Position it above or alongside the flight path map and 3D reconstruction."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Create main dashboard view listing all plane crashes with filtering and search capabilities by date, location, airline, aircraft type, or casualty count",
+      "acceptanceCriteria": [
+        "Dashboard displays a searchable and filterable list of all crashes",
+        "Users can filter by multiple criteria simultaneously",
+        "Each crash entry in the list shows key summary information",
+        "Clicking a crash entry navigates to its detailed view"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "create",
+          "description": "Create the main dashboard page that fetches all crash records using backend.getAllCrashRecordsSorted(). Display crashes in a data table or card grid showing key information: crash date, airline, flight number, location, aircraft type, casualty count (fatalities/total aboard). Implement search functionality filtering by keyword using backend.searchCrashRecordsByKeyword(). Add filter controls for date range (using backend.getCrashRecordsByDateRange()), airline, aircraft type, and casualty count ranges. Support multiple simultaneous filters. Each crash row/card should be clickable and navigate to /crash/:id. Include pagination or infinite scroll for large datasets. Add a prominent button to navigate to /add-crash for adding new records."
+        },
+        {
+          "path": "frontend/src/components/CrashListItem.tsx",
+          "operation": "create",
+          "description": "Create a reusable list item or card component for displaying crash summary information. Show crash date, airline, flight number, aircraft type, location (city/country derived from coordinates or shown as lat/lng), and casualty statistics (X fatalities / Y aboard). Include a thumbnail or icon representing the aircraft type. Make the entire component clickable to navigate to the crash detail page. Use hover effects for interactivity. Style with subdued, professional colors."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Set the DashboardPage as the default route (/) for the application. Update navigation to include a link to the dashboard in the app header or sidebar."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Apply cohesive visual design theme with professional, data-focused aesthetic using subdued colors and respectful styling appropriate for historical tragedy documentation",
+      "acceptanceCriteria": [
+        "Color scheme uses subdued, professional tones appropriate for historical tragedy documentation",
+        "Typography is clear and readable for data-heavy content",
+        "Layout provides clear visual hierarchy for complex information",
+        "Design remains consistent across all views and components"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Update global styles with a professional color palette using subdued, serious tones: dark blues/grays for primary colors, muted earth tones for accents, avoiding bright or saturated colors. Set typography with clear, readable fonts (e.g., Inter, Roboto) with appropriate font sizes for body text (16px base), headings (scale from 1.25rem to 2.5rem), and data labels (0.875rem). Define spacing scales for consistent layout. Apply smooth transitions for interactive elements. Ensure high contrast ratios for accessibility. Set background colors to light grays or off-whites to reduce eye strain during extended reading."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Configure Tailwind theme with custom color palette reflecting the serious, historical nature of the application. Define custom colors: primary (dark navy/slate), secondary (muted gray), accent (subdued blue), danger (muted red for casualty data), success (muted green for survivors). Set font family to professional sans-serif options. Configure spacing, border radius (subtle, not too rounded), and shadows (soft, understated). Ensure all custom colors are used consistently across the application for data visualization, buttons, cards, and interactive elements."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "create",
+          "description": "Create a layout component that wraps all pages with consistent structure including a header (app title 'Aviation Crash Archive', navigation links), main content area with appropriate max-width and padding, and footer (data sources attribution, disclaimer about historical data). Apply the professional color scheme and typography. Include a subtle grid or background pattern that conveys structure without being distracting. Ensure the layout is responsive and provides clear visual hierarchy."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wrap all routes with the Layout component to ensure consistent design across all pages."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.5rem;
+        
+        /* Professional, subdued color palette for historical documentation */
+        --background: 0.98 0 0;
+        --foreground: 0.15 0 0;
+        
+        --card: 1 0 0;
+        --card-foreground: 0.15 0 0;
+        
+        --popover: 1 0 0;
+        --popover-foreground: 0.15 0 0;
+        
+        /* Dark slate blue for primary - serious and professional */
+        --primary: 0.35 0.08 250;
+        --primary-foreground: 0.98 0 0;
+        
+        /* Muted gray tones */
+        --secondary: 0.92 0 0;
+        --secondary-foreground: 0.25 0 0;
+        
+        --muted: 0.94 0 0;
+        --muted-foreground: 0.50 0 0;
+        
+        --accent: 0.90 0 0;
+        --accent-foreground: 0.25 0 0;
+        
+        /* Subdued red for destructive/casualty data */
+        --destructive: 0.55 0.18 25;
+        --destructive-foreground: 0.98 0 0;
+        
+        --border: 0.88 0 0;
+        --input: 0.88 0 0;
+        --ring: 0.35 0.08 250;
+        
+        /* Chart colors - subdued earth tones */
+        --chart-1: 0.55 0.12 220;
+        --chart-2: 0.60 0.10 180;
+        --chart-3: 0.50 0.08 140;
+        --chart-4: 0.65 0.10 280;
+        --chart-5: 0.58 0.12 40;
+    }
+
+    .dark {
+        /* Dark mode with high contrast for readability */
+        --background: 0.12 0 0;
+        --foreground: 0.95 0 0;
+        
+        --card: 0.16 0 0;
+        --card-foreground: 0.95 0 0;
+        
+        --popover: 0.14 0 0;
+        --popover-foreground: 0.95 0 0;
+        
+        /* Lighter slate blue for dark mode */
+        --primary: 0.65 0.12 240;
+        --primary-foreground: 0.12 0 0;
+        
+        --secondary: 0.22 0 0;
+        --secondary-foreground: 0.90 0 0;
+        
+        --muted: 0.20 0 0;
+        --muted-foreground: 0.65 0 0;
+        
+        --accent: 0.25 0 0;
+        --accent-foreground: 0.95 0 0;
+        
+        /* Brighter red for dark mode visibility */
+        --destructive: 0.60 0.22 20;
+        --destructive-foreground: 0.95 0 0;
+        
+        --border: 0.25 0 0;
+        --input: 0.25 0 0;
+        --ring: 0.65 0.12 240;
+        
+        /* Adjusted chart colors for dark mode */
+        --chart-1: 0.60 0.15 220;
+        --chart-2: 0.65 0.12 180;
+        --chart-3: 0.55 0.10 140;
+        --chart-4: 0.70 0.14 280;
+        --chart-5: 0.63 0.15 40;
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+    
+    /* Improved typography for data-heavy content */
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-semibold tracking-tight;
+    }
+    
+    /* Smooth transitions for interactive elements */
+    button, a, [role="button"] {
+        @apply transition-colors duration-200;
+    }
+}

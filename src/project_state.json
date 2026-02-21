@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "A comprehensive historical plane crash tracking application with manual data entry system, interactive flight path maps (showing known and speculative routes), automatic aircraft identification, detailed 3D crash reconstructions with damage visualization viewable from multiple angles, investigation timelines with full documentation (preliminary reports, interim updates, final reports, safety recommendations) supporting text/images/videos, casualty tracking, and crash cause analysis. Database optimized to handle all documented historical plane crashes.",
+  "architectural_notes": [
+    "Use React with Three.js for 3D aircraft visualization and crash reconstructions",
+    "Use Motoko backend for data storage and management",
+    "Interactive maps for coordinate-based historical flight path display",
+    "Support for multiple media types (text, images, video embeds) in investigation timelines",
+    "Database structure to accommodate data from multiple crash investigation sources"
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-a-manual-data-entry-form-for-adding-plane-crash-records-with-fields-for-crash-date-location-coordinates-airline-flight-number-aircraft-type-phase-of-flight-casualties-total-aboard-fatalities-survivors-crash-cause-and-data-source-attribution-ntsb-asn-icao-etc",
+      "title": "Create a manual data entry form for adding plane crash records with fields for: crash date, location (coordinates), airline, flight number, aircraft type, phase of flight, casualties (total aboard, fatalities, survivors), crash cause, and data source attribution (NTSB, ASN, ICAO, etc.)",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-automatic-aircraft-identification-that-selects-and-displays-the-correct-aircraft-model-based-on-the-aircraft-type-entered-in-the-crash-data-form",
+      "title": "Implement automatic aircraft identification that selects and displays the correct aircraft model based on the aircraft type entered in the crash data form",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-interactive-map-visualization-using-react-that-displays-flight-paths-for-each-crash-showing-known-flight-paths-as-solid-lines-and-speculative-unknown-paths-as-dashed-lines-with-clear-labeling-indicating-speculative-route-or-unknown-path",
+      "title": "Create an interactive map visualization using React that displays flight paths for each crash, showing known flight paths as solid lines and speculative/unknown paths as dashed lines with clear labeling indicating 'Speculative Route' or 'Unknown Path'",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-3d-crash-reconstruction-viewer-using-three-js-and-react-three-fiber-that-displays-detailed-aircraft-models-with-damage-visualization-for-each-crash-allowing-users-to-rotate-and-view-the-crash-scene-from-multiple-angles-with-camera-controls",
+      "title": "Build a 3D crash reconstruction viewer using Three.js and React Three Fiber that displays detailed aircraft models with damage visualization for each crash, allowing users to rotate and view the crash scene from multiple angles with camera controls",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-comprehensive-investigation-timeline-component-that-displays-chronological-entries-for-preliminary-reports-interim-updates-final-reports-and-safety-recommendations-with-each-entry-supporting-rich-content-including-text-descriptions-embedded-images-and-video-embeds",
+      "title": "Create a comprehensive investigation timeline component that displays chronological entries for preliminary reports, interim updates, final reports, and safety recommendations, with each entry supporting rich content including text descriptions, embedded images, and video embeds",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-crash-details-view-that-displays-casualty-information-total-aboard-fatalities-survivors-and-documented-crash-cause-for-each-incident",
+      "title": "Implement a crash details view that displays casualty information (total aboard, fatalities, survivors) and documented crash cause for each incident",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-main-dashboard-view-that-lists-all-plane-crashes-with-filtering-and-search-capabilities-allowing-users-to-browse-crashes-by-date-location-airline-aircraft-type-or-casualty-count",
+      "title": "Create a main dashboard view that lists all plane crashes with filtering and search capabilities, allowing users to browse crashes by date, location, airline, aircraft type, or casualty count",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-cohesive-visual-design-theme-with-a-professional-data-focused-aesthetic-using-appropriate-colors-typography-and-layout-patterns-that-convey-seriousness-and-respect-for-the-historical-nature-of-the-content-avoiding-bright-or-playful-color-schemes",
+      "title": "Apply a cohesive visual design theme with a professional, data-focused aesthetic using appropriate colors, typography, and layout patterns that convey seriousness and respect for the historical nature of the content, avoiding bright or playful color schemes",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Manual data entry system for crash data from multiple sources (NTSB, ASN, ICAO, etc.)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Interactive flight path maps showing known paths and speculative routes (labeled as unknown)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Automatic aircraft identification system that selects correct aircraft model based on crash details",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Detailed 3D crash reconstructions with aircraft models and damage visualization viewable from multiple angles",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Investigation timeline with preliminary reports, interim updates, final reports, safety recommendations (text, images, video embeds)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Casualty tracking and crash cause analysis for each incident",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Scalable database optimized to handle all documented historical plane crashes",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Design a Motoko backend data model optimized to store and retrieve comprehensive crash records including: basic crash info, flight path coordinates (with known/speculative flags), aircraft details, casualty data, crash causes, and investigation timeline entries, with the structure capable of scaling to handle thousands of historical crash records",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Historical Plane Crash Tracker",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
